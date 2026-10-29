@@ -1,0 +1,1367 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fund &amp; Loan System</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: fixed navy sidebar + scrolling work area; summary tiles first, then alerts, then working tables */
+:root{
+  --bg:#f4f4f1; --surface:#ffffff; --surface2:#f8f8fb; --ink:#1a1a2e; --muted:#5c5c6e; --line:#e2e2e8; --line2:#eeeef2;
+  --navy:#110d54; --on-navy:#ffffff; --link:#110d54; --orange:#ff5500; --orange-ink:#b33c00;
+  --nav-bg:#110d54; --nav-ink:#d9d8ef; --nav-sec:#9c9ac4; --nav-hover:#221d6e; --nav-on:#ffffff; --nav-on-ink:#110d54;
+  --warn-bg:#fff1e8; --warn:#a33600; --ok-bg:#e8f0fb; --ok:#1f4f9e; --mute-bg:#efeff3; --mute:#4a4a5c;
+  --bad-bg:#fdecea; --bad:#b42318; --good-bg:#e7f5ec; --good:#1d6b3a;
+  --bar:#ececf1; --bar-fill:#110d54; --bar-hot:#ff5500; --overlay:rgba(17,13,84,.35);
+  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f0e1d; --surface:#18172c; --surface2:#1e1d35; --ink:#ececf4; --muted:#a3a2bd; --line:#2c2b47; --line2:#24233c;
+  --navy:#5b55e0; --on-navy:#ffffff; --link:#b3b0ff; --orange:#ff7a3d; --orange-ink:#ff9a66;
+  --nav-bg:#0a0820; --nav-ink:#cfcde8; --nav-sec:#7e7ca8; --nav-hover:#1d1a52; --nav-on:#25226a; --nav-on-ink:#ffffff;
+  --warn-bg:#3b1e0f; --warn:#ffb48a; --ok-bg:#16264a; --ok:#a3c4ff; --mute-bg:#26253d; --mute:#c4c3da;
+  --bad-bg:#3d1515; --bad:#ff9b8f; --good-bg:#123321; --good:#8fd9a8;
+  --bar:#2c2b47; --bar-fill:#8f8aff; --bar-hot:#ff7a3d; --overlay:rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f0e1d; --surface:#18172c; --surface2:#1e1d35; --ink:#ececf4; --muted:#a3a2bd; --line:#2c2b47; --line2:#24233c;
+  --navy:#5b55e0; --on-navy:#ffffff; --link:#b3b0ff; --orange:#ff7a3d; --orange-ink:#ff9a66;
+  --nav-bg:#0a0820; --nav-ink:#cfcde8; --nav-sec:#7e7ca8; --nav-hover:#1d1a52; --nav-on:#25226a; --nav-on-ink:#ffffff;
+  --warn-bg:#3b1e0f; --warn:#ffb48a; --ok-bg:#16264a; --ok:#a3c4ff; --mute-bg:#26253d; --mute:#c4c3da;
+  --bad-bg:#3d1515; --bad:#ff9b8f; --good-bg:#123321; --good:#8fd9a8;
+  --bar:#2c2b47; --bar-fill:#8f8aff; --bar-hot:#ff7a3d; --overlay:rgba(0,0,0,.55); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45}
+a{color:var(--link)} a:hover{color:var(--orange-ink)}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1{font-size:26px;line-height:1.2;margin:4px 0 0;text-wrap:balance;font-weight:700}
+h2{font-size:17px;margin:0;font-weight:600;text-wrap:balance}
+h3{font-size:13px;margin:6px 0 0;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+nav.side{background:var(--nav-bg);padding:20px 12px;padding-left:max(12px,env(safe-area-inset-left,0px));position:sticky;top:0;height:100vh;overflow:auto}
+.brand{color:#fff;padding:4px 14px 10px}
+.brand b{display:block;font-size:17px;letter-spacing:.01em}
+.brand span{font-size:12px;color:var(--nav-sec)}
+.brand i{display:inline-block;width:10px;height:10px;background:var(--orange);border-radius:2px;margin-right:8px}
+.sec{font-size:11px;color:var(--nav-sec);letter-spacing:.1em;padding:16px 14px 6px;font-weight:600}
+nav.side a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;color:var(--nav-ink);text-decoration:none;font-size:14px}
+nav.side a:hover{background:var(--nav-hover);color:#fff}
+nav.side a.on{background:var(--nav-on);color:var(--nav-on-ink);font-weight:600}
+.badge{background:var(--orange);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700}
+.navfoot{padding:18px 14px 0;font-size:12px;color:var(--nav-sec);display:grid;gap:8px}
+.navfoot button{background:transparent;border:1px solid var(--nav-sec);color:var(--nav-ink);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer;justify-self:start}
+main{padding-block:24px 64px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));display:grid;gap:20px;align-content:start;min-width:0;max-width:1400px}
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.eyebrow,.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.eyebrow a{color:var(--muted)}
+.sub{margin:6px 0 0;color:var(--muted)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+.card>.hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.hint{font-size:13px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.kpi .kv{font-size:clamp(19px,1.9vw,24px);font-weight:600;margin:6px 0 2px;overflow-wrap:anywhere}
+.kpi .foot{font-size:13px;color:var(--muted)}
+.kpi.bad{border-color:var(--bad);background:var(--bad-bg)} .kpi.bad .kv{color:var(--bad)}
+.kpi.good .kv{color:var(--good)}
+.kpi.warn{border-color:var(--orange)}
+.kpi.click{cursor:pointer;position:relative;transition:box-shadow .15s,transform .15s}.kpi.click:hover{box-shadow:0 2px 10px rgba(17,13,84,.12);transform:translateY(-1px)}.kpi.click:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.kpi .more{position:absolute;top:14px;right:14px;font-size:12px;font-weight:600;color:var(--navy-ink,var(--navy))}
+.mdl.wide{width:min(1100px,100%);max-height:calc(100vh - 40px);overflow:auto}
+.agebx{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.agebx>div{border:1px solid var(--line);border-radius:8px;padding:10px 12px}.agebx b{display:block;font-size:18px;margin-top:2px}
+.odl{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px}.odl li{display:grid;grid-template-columns:92px minmax(0,1fr) 70px 100px;gap:10px;align-items:baseline}.odl li:before{content:none}.odl .nm{overflow-wrap:anywhere}.odl .num{text-align:right}
+@media(max-width:600px){.odl li{grid-template-columns:auto 1fr;row-gap:0}.odl .num{text-align:left}}
+tr.rowclick{cursor:pointer}tr.rowclick:hover td{background:var(--surface2)}tr.rowclick:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}.rmore{font-size:12px;font-weight:600;color:var(--navy);opacity:0;margin-left:6px}tr.rowclick:hover .rmore,tr.rowclick:focus-visible .rmore{opacity:1}
+.kpi.hl{border-color:var(--navy);box-shadow:inset 0 3px 0 var(--orange)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.g-wide{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+.tw{overflow-x:auto;margin:0 -4px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:middle}
+tbody tr:hover{background:var(--surface2)}
+tr.tot td{font-weight:600;border-bottom:0;border-top:1px solid var(--line)}
+tr.tot:hover{background:transparent}
+.r{text-align:right}
+.small{font-size:12px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font:inherit;font-size:14px;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--navy);color:var(--ink)}
+.btn.pri{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.btn.pri:hover{color:var(--on-navy);filter:brightness(1.15)}
+.btn.or{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.warn{background:var(--warn-bg);color:var(--warn)} .ok{background:var(--ok-bg);color:var(--ok)} .mute{background:var(--mute-bg);color:var(--mute)}
+.bad{background:var(--bad-bg);color:var(--bad)} .good{background:var(--good-bg);color:var(--good)}
+.bar{height:8px;background:var(--bar);border-radius:4px;overflow:hidden;width:110px;flex:0 0 auto}
+.bar.full{width:100%}
+.bar i{display:block;height:100%;background:var(--bar-fill);border-radius:4px}
+.bar i.hot{background:var(--bar-hot)}
+.usage{display:flex;align-items:center;gap:8px}
+.alerts{display:grid;gap:8px}
+.alert{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;border:1px solid;font-size:14px}
+.alert.warn{border-color:var(--orange)} .alert.bad{border-color:var(--bad)}
+.alert svg{flex:0 0 auto;margin-top:1px}
+.alert b{display:block}
+.alert a{margin-left:auto;white-space:nowrap;font-weight:600}
+.list{display:grid}
+.list .li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.list .li:last-child{border-bottom:0}
+.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+.node{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;flex:1 1 130px;min-width:0}
+.node b{display:block;font-size:13px}
+.node span{font-size:13px;color:var(--muted)}
+.node.hl{border-color:var(--orange)}
+.arr{align-self:center;color:var(--muted)}
+.hbars{display:grid;gap:14px}
+.hbars .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+.hbars .trk{height:14px;background:var(--bar);border-radius:4px;overflow:hidden}
+.hbars .trk i{display:block;height:100%;border-radius:4px;background:var(--bar-fill)}
+.hbars .trk i.o{background:var(--orange)} .hbars .trk i.m{background:var(--muted)}
+.cos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.co{display:grid;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;text-decoration:none;color:var(--ink)}
+.co:hover{border-color:var(--navy);color:var(--ink)}
+.co .top{display:flex;gap:12px;align-items:center}
+.logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--navy);color:var(--on-navy);flex:0 0 auto}
+.co .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid var(--line2)}
+.co .stats span{display:block;font-size:12px;color:var(--muted)} .co .stats b{font-size:18px}
+.go{font-weight:600;color:var(--link)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.in,select.in,textarea.in{min-height:40px;border:1px solid var(--line);border-radius:8px;padding:0 12px;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);min-width:0}
+textarea.in{padding:10px 12px;width:100%;min-height:210px;font-family:var(--mono);font-size:13px;resize:vertical}
+.in.grow{flex:1 1 240px}
+.nm{font-weight:600;text-decoration:none} .nm:hover{text-decoration:underline}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font:inherit;font-size:14px;color:var(--ink);cursor:pointer}
+.tab.on{border-color:var(--navy);box-shadow:inset 0 -3px 0 var(--orange);font-weight:600}
+.terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 20px}
+.kvp span{display:block;font-size:12px;color:var(--muted)} .kvp b{font-size:15px}
+.divider{border-top:1px solid var(--line2);margin:16px 0}
+.prog{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.drop{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--line);border-radius:10px;padding:18px;cursor:pointer;color:var(--muted);text-align:center}
+.drop:hover{border-color:var(--navy);color:var(--ink)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.thumb{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px;margin-top:12px}
+.thumb img,.thumb .ph{width:56px;height:56px;object-fit:cover;border-radius:6px;background:var(--mute-bg)}
+.fld{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0}
+.fld label{font-size:13px;color:var(--muted)}
+.fld .in{min-height:34px;width:100%}
+.match{border-radius:8px;padding:12px;margin-top:12px;font-size:14px}
+.note{font-size:12px;color:var(--muted);border-left:3px solid var(--orange);padding:4px 0 4px 10px;margin-top:10px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.f{display:grid;gap:4px;min-width:0}
+.f label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.f .in{width:100%}
+.f .in.hit{border-color:var(--ok)} .f .in.chk{border-color:var(--orange)}
+.flowsteps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.step b{font-size:22px;display:block} .step span{font-size:13px;color:var(--muted)}
+.step.hl{border-color:var(--navy);box-shadow:inset 0 3px 0 var(--orange)}
+.ov{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;z-index:50;overflow:auto}
+.mdl{background:var(--surface);border-radius:12px;padding:22px;width:min(560px,100%);display:grid;gap:14px;border:1px solid var(--line)}
+.mdl td{white-space:normal;padding:8px 6px}.mdl th{white-space:normal;padding:8px 6px}
+.prev .sline{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:center;padding:5px 0}
+.prev .stitem{display:grid;grid-template-columns:minmax(0,1fr) 104px 110px auto;gap:6px;align-items:center}
+#st_tot,#st_tot>div{width:100%}
+.sline label{display:grid;gap:1px;font-size:14px;color:var(--ink)}
+.sline .in{width:100%}
+.acct{border:1px solid var(--line);border-radius:10px;background:var(--surface);min-width:0}
+#acct_list{grid-template-columns:minmax(0,1fr)}
+.acct[open]{border-color:var(--navy)}
+.acct>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr)) 24px;gap:12px;align-items:center;padding:14px 16px}
+.acct>summary::-webkit-details-marker{display:none}
+.acct>summary .chev{transition:transform .15s;color:var(--muted)}
+.acct[open]>summary .chev{transform:rotate(90deg)}
+.acct .fig span{display:block;font-size:12px;color:var(--muted)} .acct .fig b{font-size:16px}
+.acct .body{padding:0 16px 14px;border-top:1px solid var(--line2)}
+@media (max-width:760px){.acct>summary{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 24px}.acct>summary .hide-sm{display:none}}
+.mdl .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.err{color:var(--bad);font-size:14px;min-height:0}
+.err:empty{display:none}
+.prev{background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;display:grid;gap:4px}
+.prev div{display:flex;justify-content:space-between;gap:12px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:var(--on-navy);padding:10px 18px;border-radius:8px;font-size:14px;z-index:60;max-width:calc(100% - 32px)}
+.tbc{font-size:11px;font-weight:700;color:var(--orange-ink);border:1px solid var(--orange);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+.qlist{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px}
+@media (max-width:1100px){.g-wide,.grid3{grid-template-columns:minmax(0,1fr)}.cos{grid-template-columns:minmax(0,1fr)}.flowsteps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  nav.side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;display:flex;gap:4px;overflow-x:auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));z-index:20}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--nav-bg)}
+  .brand,.sec,.navfoot{display:none}
+  nav.side a{white-space:nowrap;padding:8px 12px}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 48px}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .form-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){.flowsteps{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi .kv{font-size:21px}.fld{grid-template-columns:minmax(0,1fr) auto}.fld label{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.cashc{font-weight:600;background:var(--surface2);border-left:1px solid var(--line)}
+</style>
+
+<div class="shell">
+  <nav class="side" id="nav" aria-label="Main"></nav>
+  <main id="app"></main>
+</div>
+<div id="modal"></div>
+<div id="toast" hidden></div>
+
+<script>
+/* ===== Dates & formatting ===== */
+const AS_OF='2026-10-28';
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const KEY='flms-proto-v1';
+const r2=x=>Math.round(x*100)/100;
+const sum=(a,f=x=>x)=>a.reduce((s,x)=>s+f(x),0);
+function D(s){const[y,m,d]=s.split('-').map(Number);return{y,m,d}}
+function iso(y,m,d){return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function dim(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate()}
+function addM(s,n,day){const{y,m,d}=D(s);const t=(m-1)+n;const yy=y+Math.floor(t/12);const mm=((t%12)+12)%12+1;return iso(yy,mm,Math.min(day||d,dim(yy,mm)))}
+function addD(s,n){return new Date(Date.parse(s+'T00:00:00Z')+n*864e5).toISOString().slice(0,10)}
+function days(a,b){return Math.round((Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/864e5)}
+const ymOf=s=>s.slice(0,7);
+const mIdx=ym=>{const[y,m]=ym.split('-').map(Number);return y*12+m-1};
+const ymLabel=ym=>{const[y,m]=ym.split('-').map(Number);return MON[m-1]+' '+y};
+function fd(s){if(!s)return '—';const{y,m,d}=D(s);return String(d).padStart(2,'0')+' '+MON[m-1]+' '+y}
+function fds(s){if(!s)return '—';const{m,d}=D(s);return String(d).padStart(2,'0')+' '+MON[m-1]}
+function fmt(n,dp){if(n==null||isNaN(n))return '—';const v=Math.abs(n);const d=dp!=null?dp:(Math.abs(v-Math.round(v))<0.005?0:2);return(n<-0.004?'−':'')+v.toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d})}
+const rm=(n,dp)=>'RM '+fmt(n,dp);
+const pct=(n,d=1)=>(isFinite(n)?n:0).toFixed(d)+'%';
+const shortN=n=>Math.abs(n)>=1e6?(n/1e6).toFixed(2).replace(/0$/,'')+'M':Math.abs(n)>=1e3?Math.round(n/1e3)+'k':fmt(n);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const x=parseFloat(String(v).replace(/[^\d.\-]/g,''));return isNaN(x)?0:x};
+const norm=s=>String(s||'').toLowerCase().replace(/sdn\.?\s*bhd\.?|berhad|bhd|enterprise|plt|[^a-z0-9]/g,'');
+const digits=s=>String(s||'').replace(/\D/g,'');
+
+/* ===== Seed data (sample only) ===== */
+function genRows(amount,rate,tenure,start,day){
+  const p=Math.round(amount/tenure),prof=r2(amount*rate/100),rows=[];
+  for(let n=1;n<=tenure;n++)rows.push({n,due:addM(start,n,day),principal:n<tenure?p:amount-p*(tenure-1),profit:prof,recP:0,recF:0,date:''});
+  return rows;
+}
+function allocCof(ledger,upto){const al={},cs={};
+  for(const r of ledger){if(upto&&r.date>upto)continue;
+    if(r.type==='allocation'){const t=r.to.split(':')[1];al[t]=(al[t]||0)+r.amount;cs[t]=(cs[t]||0)+r.amount*(r.rate||0)}
+    else if(r.type==='recall'){const f=r.from.split(':')[1],w=al[f]?cs[f]/al[f]:0;al[f]=(al[f]||0)-r.amount;cs[f]=(cs[f]||0)-r.amount*w}}
+  return{al,cs}}
+function seed(){
+  const s={v:6,settings:{cofBase:'allocated',maturityMonths:6,debtorLimit:30,factorFee:1.8,factorAdv:80},
+    investors:[],funds:[],companies:[],buckets:[],customers:[],cases:[],invoices:[],payments:[],ledger:[],
+    pipeline:{dmx:{applied:6,approved:3,pending:2},cob:{applied:2,approved:1,pending:0},coc:{applied:1,approved:1,pending:1}},seq:1};
+  const L=(date,type,from,to,amount,ref,note,x)=>s.ledger.push(Object.assign({id:s.seq++,date,type,from,to,amount:r2(amount),ref:ref||'',note:note||''},x||{}));
+  s.companies=[
+    {id:'dmx',name:'Domax Credit',short:'DC',products:['capboost','factoring'],purpose:'',cofRate:12,threshold:80,prefix:'DMX'},
+    {id:'cob',name:'Company B (sample)',short:'CB',products:['capboost','factoring'],purpose:'',cofRate:12,threshold:80,prefix:'COB'},
+    {id:'coc',name:'Company C (sample)',short:'CC',products:['capboost'],purpose:'',cofRate:13,threshold:80,prefix:'COC'},
+    {id:'sgt',name:'Sugoto',short:'SG',products:[],purpose:'Expenses / parking',cofRate:3.6,threshold:80,prefix:'SGT'},
+    {id:'mxs',name:'Maxus',short:'MX',products:[],purpose:'Expenses / parking',cofRate:3.6,threshold:80,prefix:'MXS'}];
+  s.investors=[{id:'i1',name:'Investor A'},{id:'i2',name:'Investor B'},{id:'i3',name:'Investor C'}];
+  s.funds=[
+    {id:'f1',investorId:'i1',principal:4e6,rate:10,start:'2026-01-01',tenor:24,payoutDay:25,status:'active',history:[]},
+    {id:'f2',investorId:'i2',principal:3.5e6,rate:12,start:'2026-03-01',tenor:12,payoutDay:28,status:'active',history:[]},
+    {id:'f3',investorId:'i3',principal:2.5e6,rate:9,start:'2026-06-15',tenor:36,payoutDay:31,status:'active',history:[]}];
+  s.funds.forEach(f=>L(f.start,'investor_in','inv:'+f.investorId,'pool',f.principal,f.id,'Principal in'));
+  s.buckets=[];
+  [['f1','dmx',3.5e6,12],['f1','sgt',5e5,3.6],['f2','dmx',2.6e6,13.5],['f2','coc',4e5,13],['f2','mxs',5e5,3.6],['f3','dmx',1.5e6,11.5],['f3','cob',1e6,12]]
+    .forEach(([fid,c,a,rate])=>{const f=s.funds.find(x=>x.id===fid);L(f.start,'allocation','pool','co:'+c,a,fid,'Allocate · '+rate+'% COF',{rate})});
+  const C=[
+    ['Sample Trading Sdn Bhd','Wholesale – building materials','Petaling Jaya','Tan Mei Ling'],
+    ['Bina Teguh Construction Sdn Bhd','Construction','Shah Alam','Ahmad Faizal'],
+    ['Selera Kampung F&B Sdn Bhd','F&B','Kuala Lumpur','Nurul Huda'],
+    ['Perkasa Precision Manufacturing Sdn Bhd','Manufacturing','Senai','Lee Chong Wei'],
+    ['Laju Logistics Sdn Bhd','Logistics','Port Klang','Ravi Kumar'],
+    ['Seri Retail Enterprise','Retail','Ipoh','Siti Aminah'],
+    ['Nusantara Agro Sdn Bhd','Agriculture','Kluang','Hafiz Rahman'],
+    ['Megah Hardware Sdn Bhd','Hardware','Klang','Wong Kah Wai'],
+    ['Cahaya Printing Sdn Bhd','Printing','Petaling Jaya','Lim Siew Lan'],
+    ['Harmoni Clinic Supplies Sdn Bhd','Healthcare supplies','Seremban','Dr. Kavitha'],
+    ['Tekun Digital Sdn Bhd','IT services','Cyberjaya','Aizat Hakim'],
+    ['Gemilang Events Sdn Bhd','Events','Kuala Lumpur','Chan Mei Yee'],
+    ['Suria Textile Sdn Bhd','Textile','Batu Pahat','Zulkifli Omar'],
+    ['Alam Florist Enterprise','Retail – florist','Subang Jaya','Priya Devi'],
+    ['Bistari Auto Parts Sdn Bhd','Automotive parts','Rawang','Ng Boon Huat'],
+    ['Rimba Furniture Sdn Bhd','Furniture','Muar','Azman Idris'],
+    ['Pantai Seafood Trading Sdn Bhd','Seafood trading','Kuantan','Mohd Rizal'],
+    ['Jaya Steel Fabricators Sdn Bhd','Steel fabrication','Klang','Teoh Kok Leong'],
+    ['Orkid Packaging Sdn Bhd','Packaging','Nilai','Farah Nadia'],
+    ['Delima Engineering Sdn Bhd','Engineering','Johor Bahru','Gan Wei Jie'],
+    ['Kencana Foods Sdn Bhd','Food manufacturing','Penang','Khoo Swee Lin']];
+  s.customers=C.map(([name,industry,loc,dir],i)=>({id:'c'+(i+1),name,industry,location:loc,address:'[Sample address], '+loc,director:dir,
+    ssm:'20'+(15+i%9)+'01'+String(100000+(i+1)*7919).slice(-6),ic:String(700101+i*1013).slice(0,6)+'-'+String(10+i%4)+'-'+String(5000+i*37).slice(-4),
+    phone:'01'+(2+i%8)+'-000 '+String(1000+i*13).slice(-4),email:'accounts@'+norm(name).slice(0,12)+'.example'}));
+  const K=[
+    ['DMX-0007','c1','dmx',150000,1.5,6,'2026-01-08',8,6],['DMX-0009','c4','dmx',400000,1.5,10,'2026-01-25',25,9],
+    ['DMX-0012','c1','dmx',200000,1.5,12,'2026-07-15',15,2],['DMX-0015','c2','dmx',500000,1.5,18,'2026-05-01',1,4],
+    ['DMX-0016','c6','dmx',150000,1.5,6,'2026-03-05',5,6],['DMX-0018','c3','dmx',300000,1.5,12,'2026-08-20',20,2],
+    ['DMX-0019','c7','dmx',600000,1.5,24,'2026-04-10',10,6],['DMX-0020','c8','dmx',800000,1.5,24,'2026-06-01',1,4],
+    ['DMX-0021','c5','dmx',250000,1.5,12,'2026-10-01',1,0],['DMX-0022','c9','dmx',450000,1.5,12,'2026-09-12',12,1],
+    ['DMX-0023','c10','dmx',700000,1.5,18,'2026-10-05',5,0],
+    ['DMX-0039','c14','dmx',120000,2,6,'2026-06-02',2,2],['DMX-0044','c13','dmx',200000,2,9,'2026-05-28',28,3],
+    ['DMX-0048','c12','dmx',250000,2,12,'2026-06-18',18,4],['DMX-0050','c17','dmx',280000,2,9,'2026-07-03',3,3],
+    ['DMX-0051','c1','dmx',80000,2,6,'2026-07-20',20,3],['DMX-0053','c15','dmx',400000,2,12,'2026-08-25',25,2],
+    ['DMX-0054','c16','dmx',350000,2,12,'2026-09-30',30,0],['DMX-0055','c11','dmx',300000,2,12,'2026-10-05',5,0],
+    ['COB-0001','c1','cob',150000,1.5,12,'2026-08-10',10,2],['COB-0002','c2','cob',200000,1.6,12,'2026-07-05',5,3],['COB-0003','c19','cob',120000,1.5,6,'2026-09-15',15,1],
+    ['COC-0001','c1','coc',100000,1.5,6,'2026-09-01',1,1],['COC-0002','c2','coc',150000,1.5,12,'2026-10-03',3,0]];
+  K.forEach(([ref,cu,co,amt,rate,ten,start,day,paid])=>{
+    const k={id:ref,ref,product:'capboost',customerId:cu,companyId:co,amount:amt,rate,tenure:ten,start,day,rows:genRows(amt,rate,ten,start,day)};
+    L(start,'disbursement','co:'+co,'case:'+ref,amt,ref,'Disburse to customer');
+    k.rows.slice(0,paid).forEach(r=>{
+      r.recP=r.principal;r.recF=r.profit;r.date=addD(r.due,r.n%3);
+      const pref=(ref==='DMX-0012'&&r.n===2)?'CHQ 004498':'IBG '+ref.replace('-','')+String(r.n).padStart(2,'0');
+      s.payments.push({id:'p'+s.seq,caseId:ref,rows:[r.n],amount:r2(r.principal+r.profit),date:r.date,ref:pref,source:'Bank transfer',confirmedBy:'Chloe'});
+      L(r.date,'repayment_profit','case:'+ref,'co:'+co,r.profit,pref,ref+' #'+r.n+' profit');
+      L(r.date,'repayment_principal','case:'+ref,'co:'+co,r.principal,pref,ref+' #'+r.n+' principal');
+    });
+    s.cases.push(k);
+  });
+  const I=[
+    ['INV-2260','dmx','c19','Petra Utilities Bhd',120000,'collected','2026-08-05','2026-10-05','2026-10-05'],
+    ['INV-2275','dmx','c18','Mega Builders Bhd',200000,'funded','2026-08-20','2026-10-20'],
+    ['INV-2280','dmx','c20','Petra Utilities Bhd',350000,'funded','2026-09-01','2026-12-01'],
+    ['INV-2284','dmx','c20','Mega Builders Bhd',150000,'funded','2026-09-10','2026-11-10'],
+    ['INV-2286','dmx','c19','Hijau Retail Bhd',220000,'funded','2026-09-12','2026-11-12'],
+    ['INV-2288','dmx','c19','Sinar Telco Bhd',300000,'funded','2026-09-15','2026-11-15'],
+    ['INV-2291','dmx','c18','Mega Builders Bhd',500000,'funded','2026-10-01','2026-11-30'],
+    ['INV-2293','dmx','c21','Hijau Retail Bhd',260000,'funded','2026-10-08','2026-12-08'],
+    ['INV-2296','dmx','c21','Sinar Telco Bhd',180000,'funded','2026-10-15','2027-01-15'],
+    ['INV-2299','cob','c18','Sinar Telco Bhd',150000,'funded','2026-10-10','2026-12-10'],
+    ['INV-2300','cob','c1','Hijau Retail Bhd',80000,'funded','2026-09-25','2026-11-25'],
+    ['INV-2301','dmx','c1','Petra Utilities Bhd',100000,'funded','2026-10-12','2026-12-12'],
+    ['INV-2302','dmx','c18','Mega Builders Bhd',150000,'verified',null,'2027-01-10'],
+    ['INV-2305','dmx','c19','Hijau Retail Bhd',90000,'submitted',null,'2027-01-20']];
+  I.forEach(([no,co,cl,debtor,amount,status,fundedOn,debtorDue,collectedOn])=>{
+    const iv={id:no,no,companyId:co,clientId:cl,debtor,amount,advPct:80,advanced:amount*.8,status,fundedOn,debtorDue,collectedOn:collectedOn||null,fee:0,rebate:0};
+    if(fundedOn)L(fundedOn,'disbursement','co:'+co,'inv:'+no,iv.advanced,no,'Advance to client');
+    if(collectedOn){const m=Math.max(1,Math.ceil(days(fundedOn,collectedOn)/30));iv.fee=r2(iv.advanced*1.8/100*m);iv.rebate=r2(amount-iv.advanced-iv.fee);
+      L(collectedOn,'repayment_principal','inv:'+no,'co:'+co,iv.advanced,no,'Debtor paid · advance back');
+      L(collectedOn,'repayment_profit','inv:'+no,'co:'+co,iv.fee,no,'Fee (ujrah) '+m+' mth');
+      L(collectedOn,'rebate_to_client','co:'+co,'cust:'+cl,iv.rebate,no,'Balance / rebate to client');}
+    s.invoices.push(iv);
+  });
+  // monthly COF transfers + parking yield, Jan–Sep 2026
+  for(let m=1;m<=9;m++){const ym='2026-'+String(m).padStart(2,'0'),me=iso(2026,m,dim(2026,m));
+    const ac=allocCof(s.ledger,me);
+    s.companies.forEach(c=>{const cs=ac.cs[c.id]||0;if(cs>0)L(me,'cof_transfer','co:'+c.id,'pool',cs/1200,c.id+':'+ym,'COF '+ymLabel(ym));});
+    s.buckets.forEach(b=>{const a=sum(s.ledger.filter(l=>l.type==='park'&&l.to==='park:'+b.id&&l.date<=me),l=>l.amount);
+      if(a>0)L(me,'parking_yield','park:'+b.id,'pool',a*b.yield/1200,b.id+':'+ym,'Yield '+ymLabel(ym));});}
+  // investor profit payouts already made
+  s.funds.forEach(f=>{for(let k=1;k<=f.tenor;k++){const ym=ymOf(addM(f.start,k,1));const d=payoutDate(f,ym);
+    if(d<AS_OF)L(d,'investor_profit_payout','pool','inv:'+f.investorId,f.principal*f.rate/1200,f.id+':'+ym,'Profit '+ymLabel(ym));}});
+  return s;
+}
+
+/* ===== State ===== */
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
+if(!S||S.v!==6)S=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const ui={aq:'',aShow:'ongoing',aSort:'issued',aOpen:{},cbYear:AS_OF.slice(0,4),fYear:AS_OF.slice(0,4),co:'dmx',q:'',st:'all',sort:'due',tab:{},month:'2026-10',ocr:null,nc:null,lt:'all'};
+const L=(date,type,from,to,amount,ref,note,x)=>S.ledger.push(Object.assign({id:S.seq++,date,type,from,to,amount:r2(amount),ref:ref||'',note:note||''},x||{}));
+const coById=id=>S.companies.find(c=>c.id===id);
+const custById=id=>S.customers.find(c=>c.id===id);
+const PRODUCTS={capboost:'CapBoost',factoring:'Capbridge-i'};
+const offers=(c,p)=>!!c&&(c.products||[]).includes(p);
+const lending=()=>S.companies.filter(c=>(c.products||[]).length);
+const coDesc=c=>(c.products||[]).length?c.products.map(p=>PRODUCTS[p]).join(' + '):(c.purpose||'No lending products');
+const invName=id=>(S.investors.find(i=>i.id===id)||{}).name||id;
+
+/* ===== Calculations (all balances come from the ledger) ===== */
+function balances(){
+  const b={principal:0,alloc:{},cofSum:{},dep:{},park:{},income:{},cof:{},paidOut:0,yieldIn:0};
+  const add=(o,k,a)=>o[k]=(o[k]||0)+a;
+  for(const r of S.ledger){const a=r.amount,f=r.from.split(':')[1],t=r.to.split(':')[1];
+    switch(r.type){
+      case 'investor_in':b.principal+=a;break;
+      case 'investor_principal_repaid':b.principal-=a;break;
+      case 'allocation':add(b.alloc,t,a);add(b.cofSum,t,a*(r.rate!=null?r.rate:((coById(t)||{}).cofRate||0)));break;
+      case 'recall':{const w=b.alloc[f]?(b.cofSum[f]||0)/b.alloc[f]:0;add(b.alloc,f,-a);add(b.cofSum,f,-a*w);break}
+      case 'park':add(b.park,t,a);break;
+      case 'unpark':add(b.park,f,-a);break;
+      case 'disbursement':add(b.dep,f,a);break;
+      case 'repayment_principal':case 'principal_writeoff':add(b.dep,t,-a);break;
+      case 'other_charge':add(b.income,t,a);break;
+      case 'repayment_profit':add(b.income,t,a);break;
+      case 'cof_transfer':add(b.cof,f,a);break;
+      case 'parking_yield':b.yieldIn+=a;break;
+      case 'investor_profit_payout':b.paidOut+=a;break;}}
+  b.allocT=sum(Object.values(b.alloc));b.parkT=sum(Object.values(b.park));b.depT=sum(Object.values(b.dep));
+  b.idle=r2(b.principal-b.allocT-b.parkT);
+  b.avail=id=>r2((b.alloc[id]||0)-(b.dep[id]||0));
+  b.coRate=id=>(b.alloc[id]||0)>0.5?(b.cofSum[id]||0)/b.alloc[id]:((coById(id)||{}).cofRate||0);
+  b.usage=id=>b.alloc[id]?(b.dep[id]||0)/b.alloc[id]*100:0;
+  b.profitAcct=r2(sum(Object.values(b.cof))+b.yieldIn-b.paidOut);
+  return b;
+}
+const cofMonthly=(b,c)=>r2(S.settings.cofBase==='allocated'?Math.max(0,b.cofSum[c.id]||0)/1200:(b.dep[c.id]||0)*b.coRate(c.id)/1200);
+const maturity=f=>addM(f.start,f.tenor);
+const terms=f=>[...(f.history||[]),{start:f.start,tenor:f.tenor,rate:f.rate}];
+function payoutDate(f,ym){const[y,m]=ym.split('-').map(Number);return iso(y,m,Math.min(f.payoutDay,dim(y,m)))}
+function fundRateIn(f,ym){
+  if(f.status==='repaid'&&f.repaidOn&&ymOf(f.repaidOn)<ym)return 0;
+  for(const t of terms(f)){const k=mIdx(ym)-mIdx(ymOf(t.start));if(k>=1&&k<=t.tenor)return t.rate}
+  return 0;
+}
+function monthFig(ym,b){
+  const[y,m]=ym.split('-').map(Number),ms=iso(y,m,1),me=iso(y,m,dim(y,m));
+  const pays=S.funds.map(f=>{const r=fundRateIn(f,ym);if(!r)return null;
+    return{f,amt:r2(f.principal*r/1200),date:payoutDate(f,ym),paid:S.ledger.some(l=>l.type==='investor_profit_payout'&&l.ref===f.id+':'+ym)}}).filter(Boolean);
+  const cos=S.companies.map(c=>{let cb=0,fee=0;
+    S.cases.filter(k=>k.companyId===c.id).forEach(k=>k.rows.forEach(r=>{if(ymOf(r.due)===ym)cb+=r.profit-(r.waived||0)}));
+    S.invoices.forEach(i=>{if(i.companyId===c.id&&i.fundedOn&&i.fundedOn<=me&&(!i.collectedOn||i.collectedOn>=ms))fee+=i.advanced*S.settings.factorFee/100});
+    const inc=cb+fee,cof=cofMonthly(b,c);
+    return{c,cb:r2(cb),fee:r2(fee),inc:r2(inc),cof,net:r2(inc-cof),dep:b.dep[c.id]||0,alloc:b.alloc[c.id]||0,posted:cof<=0||S.ledger.some(l=>l.type==='cof_transfer'&&l.ref===c.id+':'+ym)}});
+  const yieldM=r2(sum(S.buckets,k=>(b.park[k.id]||0)*k.yield/1200));
+  const payable=r2(sum(pays,p=>p.amt)),income=r2(sum(cos,c=>c.inc)),cofT=r2(sum(cos,c=>c.cof)),recovered=r2(cofT+yieldM);
+  return{ym,pays,payable,cos,yieldM,income,cofT,recovered,surplus:r2(recovered-payable)};
+}
+function maturityPlans(b){
+  let idle=Math.max(0,b.idle),park=Math.max(0,b.parkT);const avail={};S.companies.forEach(c=>avail[c.id]=Math.max(0,b.avail(c.id)));
+  return S.funds.filter(f=>f.status==='active').map(f=>({f,mat:maturity(f)})).sort((x,y)=>x.mat<y.mat?-1:1).map(({f,mat})=>{
+    let need=f.principal;const parts=[];
+    const take=(amt,label)=>{const t=Math.min(need,amt);if(t>0){parts.push([label,t]);need-=t}return t};
+    idle-=take(idle,'Pool cash');park-=take(park,'Parking');
+    Object.keys(avail).sort((a,c)=>avail[c]-avail[a]).forEach(id=>{avail[id]-=take(avail[id],'Recall '+coById(id).name.split(' (')[0])});
+    const ml=days(AS_OF,mat)/30.44;
+    return{f,mat,ml,parts,short:r2(need),inWindow:ml<=S.settings.maturityMonths};
+  });
+}
+const inst=r=>r2(r.principal+r.profit), recd=r=>r2((r.recP||0)+(r.recF||0)), owe=r=>r2(inst(r)-recd(r)-(r.waived||0));
+function caseInfo(k){
+  const total=r2(sum(k.rows,inst)),received=r2(sum(k.rows,recd)),waived=r2(sum(k.rows,r=>r.waived||0)),principalOut=r2(k.amount-sum(k.rows,r=>r.recP||0));
+  const unpaid=k.rows.filter(r=>owe(r)>0.004),od=unpaid.filter(r=>r.due<AS_OF);
+  const next=unpaid.find(r=>r.due>=AS_OF)||unpaid[0]||null;
+  const paidCount=k.rows.length-unpaid.length;
+  const overdue=r2(sum(od,owe)),dpd=od.length?days(od[0].due,AS_OF):0;
+  const status=!unpaid.length?'Settled':overdue>0?'Overdue':(paidCount===0&&!k.rows.some(r=>r.due<AS_OF))?'New':'Active';
+  return{total,received,waived,balance:r2(total-received-waived),principalOut,unpaid,next,paidCount,overdue,dpd,status};
+}
+const statusChip=s=>({Settled:'mute',Overdue:'warn',New:'ok',Active:'ok',Current:'ok'}[s]||'mute');
+function custSummary(cu,coId){
+  const cs=S.cases.filter(k=>k.customerId===cu.id&&(coId==='all'||k.companyId===coId));
+  const iv=S.invoices.filter(i=>i.clientId===cu.id&&(coId==='all'||i.companyId===coId));
+  if(!cs.length&&!iv.length)return null;
+  const infos=cs.map(caseInfo);
+  const live=iv.filter(i=>i.status==='funded');
+  let next=null,nextAmt=0;
+  cs.forEach((k,i)=>{const n=infos[i].next;if(n&&n.due>=AS_OF&&(!next||n.due<next)){next=n.due;nextAmt=owe(n)}});
+  live.forEach(i=>{if(i.debtorDue>=AS_OF&&(!next||i.debtorDue<next)){next=i.debtorDue;nextAmt=i.amount}});
+  const ivOver=live.filter(i=>i.debtorDue<AS_OF);
+  const overdue=r2(sum(infos,x=>x.overdue)+sum(ivOver,i=>i.advanced));
+  const dpd=Math.max(0,...infos.map(x=>x.dpd),...ivOver.map(i=>days(i.debtorDue,AS_OF)));
+  const active=infos.filter(x=>x.status!=='Settled').length+live.length+iv.filter(i=>['submitted','verified'].includes(i.status)).length;
+  const status=overdue>0?'Overdue':active===0?'Settled':infos.length&&infos.every(x=>x.status==='New'||x.status==='Settled')&&infos.some(x=>x.status==='New')?'New':'Active';
+  const others=coId==='all'?[]:[...new Set(S.cases.filter(k=>k.customerId===cu.id).map(k=>k.companyId).concat(S.invoices.filter(i=>i.clientId===cu.id).map(i=>i.companyId)))].filter(x=>x!==coId);
+  return{cu,cases:cs.length+iv.length,active,total:r2(sum(cs,k=>k.amount)+sum(iv.filter(i=>i.fundedOn),i=>i.advanced)),
+    outstanding:r2(sum(infos,x=>x.balance)+sum(live,i=>i.advanced)),next,nextAmt,overdue,dpd,status,others};
+}
+function alertsList(b){
+  const a=[];
+  if(b.idle>0.5)a.push({sev:'bad',t:rm(b.idle)+' sitting in the pool, not allocated',d:'All investor money should go to a company. Allocate it now.',href:'#pool'});
+  S.companies.forEach(c=>{const u=b.usage(c.id);if(u>=c.threshold)a.push({sev:'warn',t:c.name+' at '+pct(u)+' fund usage',d:'Threshold '+c.threshold+'% · only '+rm(b.avail(c.id))+' available. Top up allocation or slow new disbursements.',href:'#pool'})});
+  const mp=maturityPlans(b).find(p=>p.inWindow);
+  if(mp){const cover=r2(mp.f.principal-mp.short);
+    if(mp.short>0)a.push({sev:'bad',t:'Principal maturity in '+mp.ml.toFixed(1)+' months — short '+rm(mp.short),d:invName(mp.f.investorId)+' '+rm(mp.f.principal)+' due '+fd(mp.mat)+'. Parked + recallable only '+rm(cover)+'. Roll over, add funds, or recall deployed money.',href:'#dashboard'});
+    else a.push({sev:'warn',t:'Principal maturity in '+mp.ml.toFixed(1)+' months',d:invName(mp.f.investorId)+' '+rm(mp.f.principal)+' due '+fd(mp.mat)+'. Plan: '+mp.parts.map(p=>p[0]+' '+shortN(p[1])).join(' + '),href:'#dashboard'});}
+  [ymOf(AS_OF),ymOf(addM(AS_OF,1))].forEach(ym=>{const m=monthFig(ym,b);if(m.surplus<0){const soon=m.pays.filter(p=>!p.paid&&days(AS_OF,p.date)<=7&&days(AS_OF,p.date)>=0);
+    a.push({sev:'bad',t:'Pool gap in '+ymLabel(ym)+': '+rm(-m.surplus),d:'COF recovered '+rm(m.recovered)+' < investor profit payable '+rm(m.payable)+(soon.length?' · '+soon.length+' payout(s) due within 7 days':''),href:'#dashboard'})}});
+  return a;
+}
+function debtorConc(ids){
+  const live=S.invoices.filter(i=>i.status==='funded'&&(!ids||ids.includes(i.companyId))),tot=sum(live,i=>i.advanced),g={};
+  live.forEach(i=>g[i.debtor]=(g[i.debtor]||0)+i.advanced);
+  return Object.entries(g).map(([debtor,amt])=>({debtor,amt,p:tot?amt/tot*100:0,over:tot&&amt/tot*100>S.settings.debtorLimit})).sort((x,y)=>y.amt-x.amt);
+}
+
+/* ===== UI helpers ===== */
+const ICON={warn:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5"/><path d="M12 18h.01"/></svg>',
+  arrow:'<svg class="arr" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  up:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>'};
+const chip=(t,c='mute')=>'<span class="chip '+c+'">'+t+'</span>';
+const kpiC=(act,data,l,v,f,c='')=>kpi(l,v,f,c+' click').replace('<div class="kpi ','<div role="button" tabindex="0" aria-label="'+l+' — view list" data-act="'+act+'" '+data+' class="kpi ').replace('<div class="lbl">','<span class="more">View list →</span><div class="lbl">');
+const kpi=(l,v,f,c='')=>'<div class="kpi '+c+'"><div class="lbl">'+l+'</div><div class="kv num">'+v+'</div><div class="foot">'+f+'</div></div>';
+const bar=(p,th,full)=>'<div class="bar'+(full?' full':'')+'"><i style="width:'+Math.max(0,Math.min(100,p)).toFixed(1)+'%" class="'+(th!=null&&p>=th?'hot':'')+'"></i></div>';
+const head=(eb,title,acts='',sub='')=>'<header class="ph"><div><div class="eyebrow">'+eb+'</div><h1>'+title+'</h1>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div><div class="acts">'+acts+'</div></header>';
+const tbc='<span class="tbc" title="Terms not yet confirmed">TBC</span>';
+function alertsHTML(list){if(!list.length)return '';
+  return '<div class="alerts" role="region" aria-label="Alerts">'+list.map(a=>'<div class="alert '+a.sev+'">'+ICON.warn+'<div><b>'+esc(a.t)+'</b><span>'+esc(a.d)+'</span></div>'+(a.href&&location.hash!==a.href?'<a href="'+a.href+'">Open</a>':'')+'</div>').join('')+'</div>'}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,3200)}
+const entLabel=e=>{const[k,id]=e.split(':');if(k==='pool')return 'Big pool';if(k==='co')return(coById(id)||{}).name||id;if(k==='inv'){const iv=S.investors.find(i=>i.id===id);return iv?iv.name:'Invoice '+id}
+  if(k==='park')return(S.buckets.find(b=>b.id===id)||{}).name||id;if(k==='case')return 'Case '+id;if(k==='cust')return(custById(id)||{}).name||id;return e};
+const TYPE={investor_in:'Investor principal in',allocation:'Allocate to company',recall:'Recall from company',park:'Park',unpark:'Recall from parking',disbursement:'Disbursement',
+  repayment_principal:'Repayment · principal',repayment_profit:'Repayment · profit',cof_transfer:'COF to pool',parking_yield:'Parking yield',investor_profit_payout:'Investor profit payout',
+  investor_principal_repaid:'Investor principal repaid',principal_writeoff:'Principal written off',other_charge:'Other charge received',rebate_to_client:'Rebate to client'};
+
+/* ===== Modal ===== */
+let MODAL=null;
+function openModal(title,body,submit,label,onInput){
+  const m=document.getElementById('modal');
+  m.innerHTML='<div class="ov" data-act="ovclose"><form class="mdl" id="mf" role="dialog" aria-modal="true" aria-labelledby="mt" novalidate><h2 id="mt">'+title+'</h2>'+body+'<div class="err" id="merr" role="alert"></div><div class="row"><button type="button" class="btn" data-act="close">Cancel</button><button class="btn pri" type="submit">'+label+'</button></div></form></div>';
+  const f=document.getElementById('mf');MODAL={submit,onInput};
+  f.addEventListener('submit',e=>{e.preventDefault();const data=Object.fromEntries(new FormData(f));const err=submit(data,f);
+    if(err){document.getElementById('merr').textContent=err;return}closeModal();save();render();});
+  if(onInput){f.addEventListener('input',e=>onInput(f,e));f.addEventListener('change',e=>onInput(f,e));onInput(f)}
+  const first=f.querySelector('input,select,textarea');if(first)first.focus();
+}
+function openView(title,body){
+  const m=document.getElementById('modal');
+  m.innerHTML='<div class="ov" data-act="ovclose"><div class="mdl wide" role="dialog" aria-modal="true" aria-labelledby="mt"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="mt" style="margin:0">'+title+'</h2><button type="button" class="btn" data-act="close">Close</button></div>'+body+'</div></div>';
+  MODAL={view:true};const c=m.querySelector('[data-act="close"]');if(c)c.focus();
+}
+const AGE=[['1–30 days',1,30],['31–60 days',31,60],['61–90 days',61,90],['90+ days',91,1e9]];
+function cbListHTML(kind,scope){
+  const cos=scopeCos(scope,'capboost'),ids=cos.map(c=>c.id),all=scope==='all';
+  let cs=S.cases.filter(k=>ids.includes(k.companyId)).map(k=>({k,i:caseInfo(k)}));
+  const cu=x=>'<a href="#customer-'+x.k.customerId+'" data-act="tab" data-cu="'+x.k.customerId+'" data-k="'+x.k.id+'" data-nav="1">'+x.k.ref+'</a>';
+  const coTd=x=>all?'<td>'+esc(coById(x.k.companyId).name)+'</td>':'',coTh=all?'<th>Company</th>':'';
+  if(kind==='od'){
+    cs=cs.filter(x=>x.i.status!=='Settled'&&x.i.overdue>0).sort((a,b)=>b.i.dpd-a.i.dpd);
+    const ageOf=d=>AGE.find(a=>d>=a[1]&&d<=a[2]);
+    const box='<div class="agebx">'+AGE.map(a=>{const g=cs.filter(x=>ageOf(x.i.dpd)===a);return '<div'+(g.length&&a[1]>30?' style="border-color:var(--orange)"':'')+'><span class="small">'+a[0]+' · '+g.length+' case'+(g.length===1?'':'s')+'</span><b class="num"'+(g.length?' style="color:var(--orange-ink)"':'')+'>RM '+fmt(r2(sum(g,x=>x.i.overdue)),0)+'</b></div>'}).join('')+'</div>';
+    const rows=cs.map(x=>{const od=x.i.unpaid.filter(r=>r.due<AS_OF),lastPay=S.payments.filter(p=>p.caseId===x.k.id).map(p=>p.date).sort().pop(),cust=custById(x.k.customerId);
+      return '<tr><td>'+cu(x)+'</td>'+coTd(x)+'<td>'+esc(cust.name)+'<div class="small">'+esc(cust.director)+' · '+esc(cust.phone)+'</div></td><td>'+fds(od[0].due)+'</td><td class="r num">'+x.i.dpd+'</td><td>'+chip(ageOf(x.i.dpd)[0],x.i.dpd>30?'bad':'warn')+'</td><td class="r num">'+od.length+'</td><td class="r num" style="font-weight:600;color:var(--orange-ink)">'+fmt(x.i.overdue)+'</td><td class="r num">'+fmt(x.i.principalOut)+'</td><td>'+(lastPay?fds(lastPay):'None')+'</td></tr>'}).join('');
+    return '<p class="small" style="margin:0">Overdue = instalments past their due date and not yet paid, as at '+fd(AS_OF)+'. Aging is by days since the oldest unpaid instalment.</p>'+box+
+      '<div class="tw"><table><thead><tr><th>Case</th>'+coTh+'<th>Customer</th><th>Overdue since</th><th class="r">Days</th><th>Aging</th><th class="r">Missed</th><th class="r">Overdue amount</th><th class="r">Principal out</th><th>Last payment</th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="10" class="small">No overdue cases</td></tr>')+
+      '<tr class="tot"><td colspan="'+(all?6:5)+'">Total · '+cs.length+' case'+(cs.length===1?'':'s')+'</td><td class="r num">'+sum(cs,x=>x.i.unpaid.filter(r=>r.due<AS_OF).length)+'</td><td class="r num">'+fmt(r2(sum(cs,x=>x.i.overdue)))+'</td><td class="r num">'+fmt(r2(sum(cs,x=>x.i.principalOut)))+'</td><td></td></tr></tbody></table></div>';
+  }
+  cs.sort((a,b)=>a.k.start<b.k.start?1:-1);
+  const n=st=>cs.filter(x=>x.i.status===st).length;
+  const rows=cs.map(x=>'<tr><td>'+cu(x)+'</td>'+coTd(x)+'<td>'+esc(custById(x.k.customerId).name)+'</td><td>'+fds(x.k.start)+'</td><td class="r num">'+fmt(x.k.amount)+'</td><td class="r num">'+x.k.rate.toFixed(1)+'%</td><td>'+x.k.tenure+' m</td><td class="r num">'+fmt(r2(x.k.amount-x.i.principalOut))+'</td><td class="r num">'+fmt(x.i.principalOut)+'</td><td>'+(x.k.settlement?chip('Settled early','mute'):chip(x.i.status==='Settled'?'Fully paid':x.i.status,statusChip(x.i.status)))+'</td></tr>').join('');
+  return '<p class="small" style="margin:0">'+cs.length+' cases since start · '+(cs.length-n('Settled'))+' ongoing ('+n('Overdue')+' overdue, '+n('New')+' new) · '+n('Settled')+' settled. Click a case number to open it.</p>'+
+    '<div class="tw"><table><thead><tr><th>Case</th>'+coTh+'<th>Customer</th><th>Issued on</th><th class="r">Amount</th><th class="r">Rate / mth</th><th>Tenure</th><th class="r">Principal repaid</th><th class="r">Principal out</th><th>Status</th></tr></thead><tbody>'+rows+
+    '<tr class="tot"><td colspan="'+(all?4:3)+'">Total</td><td class="r num">'+fmt(r2(sum(cs,x=>x.k.amount)))+'</td><td colspan="2"></td><td class="r num">'+fmt(r2(sum(cs,x=>x.k.amount-x.i.principalOut)))+'</td><td class="r num">'+fmt(r2(sum(cs,x=>x.i.principalOut)))+'</td><td></td></tr></tbody></table></div>';
+}
+function cbMonthHTML(ym,scope){
+  const ids=scopeCos(scope,'capboost').map(c=>c.id),all=scope==='all';
+  const cs=S.cases.filter(k=>ids.includes(k.companyId)).map(k=>({k,i:caseInfo(k)}));
+  const link=x=>'<a href="#customer-'+x.k.customerId+'" data-act="tab" data-cu="'+x.k.customerId+'" data-k="'+x.k.id+'" data-nav="1">'+x.k.ref+'</a>';
+  const coTd=x=>all?'<td>'+esc(coById(x.k.companyId).name)+'</td>':'',coTh=all?'<th>Company</th>':'';
+  const iss=cs.filter(x=>ymOf(x.k.start)===ym).sort((a,b)=>a.k.start<b.k.start?-1:1);
+  const pr=[];cs.forEach(x=>x.k.rows.forEach(r=>{if(ymOf(r.due)===ym)pr.push({x,r})}));pr.sort((a,b)=>a.r.due<b.r.due?-1:1);
+  const gotOf=x=>r2(sum(S.ledger.filter(l=>l.type==='repayment_profit'&&l.from==='case:'+x.k.id&&ymOf(l.date)===ym),l=>l.amount));
+  const st=r=>owe(r)<=0.004?(r.waived?chip('Settled','mute'):chip('Paid','good')):r.due<AS_OF?chip('Overdue','bad'):chip('Due','');
+  const due=r2(sum(pr,p=>p.r.profit-(p.r.waived||0))),seen=new Set(),got=r2(sum(pr.filter(p=>!seen.has(p.x.k.id)&&seen.add(p.x.k.id)),p=>gotOf(p.x)));
+  return '<h3 style="margin:4px 0 0;font-size:15px">Cases issued · '+iss.length+' · RM '+fmt(r2(sum(iss,x=>x.k.amount)))+'</h3>'+
+    (iss.length?'<div class="tw"><table><thead><tr><th>Case</th>'+coTh+'<th>Customer</th><th>Issued on</th><th class="r">Amount</th><th class="r">Rate / mth</th><th>Tenure</th><th class="r">Monthly instalment</th><th class="r">Principal out</th><th>Status</th></tr></thead><tbody>'+
+      iss.map(x=>'<tr><td>'+link(x)+'</td>'+coTd(x)+'<td>'+esc(custById(x.k.customerId).name)+'</td><td>'+fds(x.k.start)+'</td><td class="r num">'+fmt(x.k.amount)+'</td><td class="r num">'+x.k.rate.toFixed(1)+'%</td><td>'+x.k.tenure+' m</td><td class="r num">'+fmt(inst(x.k.rows[0]))+'</td><td class="r num">'+fmt(x.i.principalOut)+'</td><td>'+chip(x.i.status==='Settled'?'Fully paid':x.i.status,statusChip(x.i.status))+'</td></tr>').join('')+
+      '<tr class="tot"><td colspan="'+(all?4:3)+'">Total</td><td class="r num">'+fmt(r2(sum(iss,x=>x.k.amount)))+'</td><td colspan="3"></td><td class="r num">'+fmt(r2(sum(iss,x=>x.i.principalOut)))+'</td><td></td></tr></tbody></table></div>':'<p class="small" style="margin:0">No cases issued this month.</p>')+
+    '<h3 style="margin:10px 0 0;font-size:15px">Profit this month · due RM '+fmt(due)+(ym<=ymOf(AS_OF)?' · received RM '+fmt(got):'')+'</h3>'+
+    (pr.length?'<div class="tw"><table><thead><tr><th>Case</th>'+coTh+'<th>Customer</th><th>Instalment</th><th>Due date</th><th class="r">Instalment</th><th class="r">Profit due</th><th class="r">Profit received</th><th>Status</th></tr></thead><tbody>'+
+      pr.map(({x,r})=>'<tr><td>'+link(x)+'</td>'+coTd(x)+'<td>'+esc(custById(x.k.customerId).name)+'</td><td>#'+r.n+' of '+x.k.tenure+'</td><td>'+fds(r.due)+'</td><td class="r num">'+fmt(inst(r))+'</td><td class="r num">'+fmt(r2(r.profit-(r.waived||0)))+'</td><td class="r num">'+(r.recF?fmt(r.recF):'—')+'</td><td>'+st(r)+'</td></tr>').join('')+
+      '<tr class="tot"><td colspan="'+(all?5:4)+'">Total · '+pr.length+' instalments</td><td class="r num">'+fmt(r2(sum(pr,p=>inst(p.r))))+'</td><td class="r num">'+fmt(due)+'</td><td class="r num">'+fmt(r2(sum(pr,p=>p.r.recF||0)))+'</td><td></td></tr></tbody></table></div>':'<p class="small" style="margin:0">No instalments due this month.</p>')+
+    '<p class="small" style="margin:0">Profit received here is the profit portion paid against each instalment due this month. The monthly table counts profit by the date the money came in, so late or early payments can make the two differ slightly.</p>';
+}
+function fMonthHTML(ym,scope){
+  const ids=scopeCos(scope,'factoring').map(c=>c.id),all=scope==='all',fee=S.settings.factorFee/100;
+  const[y,m]=ym.split('-').map(Number),ms=iso(y,m,1),me=iso(y,m,dim(y,m));
+  const invs=S.invoices.filter(i=>ids.includes(i.companyId)&&i.fundedOn);
+  const coTd=i=>all?'<td>'+esc(coById(i.companyId).name)+'</td>':'',coTh=all?'<th>Company</th>':'';
+  const st=i=>i.status==='collected'?chip('Collected','mute'):i.debtorDue<AS_OF?chip('Overdue','bad'):chip('Funded','ok');
+  const f=invs.filter(i=>ymOf(i.fundedOn)===ym).sort((a,b)=>a.fundedOn<b.fundedOn?-1:1);
+  const out=invs.filter(i=>i.fundedOn<=me&&(!i.collectedOn||i.collectedOn>=ms));
+  const got=i=>r2(sum(S.ledger.filter(l=>l.type==='repayment_profit'&&l.from==='inv:'+i.no&&ymOf(l.date)===ym),l=>l.amount));
+  return '<h3 style="margin:4px 0 0;font-size:15px">Invoices funded · '+f.length+' · RM '+fmt(r2(sum(f,i=>i.advanced)))+' advanced</h3>'+
+    (f.length?'<div class="tw"><table><thead><tr><th>Invoice</th>'+coTh+'<th>Client</th><th>Debtor</th><th>Funded on</th><th class="r">Invoice amount</th><th class="r">Advanced</th><th>Debtor due</th><th>Status</th></tr></thead><tbody>'+
+      f.map(i=>'<tr><td>'+i.no+'</td>'+coTd(i)+'<td><a href="#customer-'+i.clientId+'">'+esc(custById(i.clientId).name)+'</a></td><td>'+esc(i.debtor)+'</td><td>'+fds(i.fundedOn)+'</td><td class="r num">'+fmt(i.amount)+'</td><td class="r num">'+fmt(i.advanced)+'</td><td>'+fds(i.debtorDue)+'</td><td>'+st(i)+'</td></tr>').join('')+
+      '<tr class="tot"><td colspan="'+(all?5:4)+'">Total</td><td class="r num">'+fmt(r2(sum(f,i=>i.amount)))+'</td><td class="r num">'+fmt(r2(sum(f,i=>i.advanced)))+'</td><td colspan="2"></td></tr></tbody></table></div>':'<p class="small" style="margin:0">No invoices funded this month.</p>')+
+    '<h3 style="margin:10px 0 0;font-size:15px">Fee this month · earned RM '+fmt(r2(sum(out,i=>i.advanced*fee)))+' · received RM '+fmt(r2(sum(out,got)))+'</h3>'+
+    (out.length?'<div class="tw"><table><thead><tr><th>Invoice</th>'+coTh+'<th>Client</th><th class="r">Advanced</th><th class="r">Fee earned ('+S.settings.factorFee+'%)</th><th class="r">Fee received</th><th>Status</th></tr></thead><tbody>'+
+      out.map(i=>'<tr><td>'+i.no+'</td>'+coTd(i)+'<td>'+esc(custById(i.clientId).name)+'</td><td class="r num">'+fmt(i.advanced)+'</td><td class="r num">'+fmt(r2(i.advanced*fee))+'</td><td class="r num">'+(got(i)?fmt(got(i)):'—')+'</td><td>'+st(i)+'</td></tr>').join('')+
+      '<tr class="tot"><td colspan="'+(all?3:2)+'">Total · '+out.length+' invoices</td><td class="r num">'+fmt(r2(sum(out,i=>i.advanced)))+'</td><td class="r num">'+fmt(r2(sum(out,i=>i.advanced*fee)))+'</td><td class="r num">'+fmt(r2(sum(out,got)))+'</td><td></td></tr></tbody></table></div>':'<p class="small" style="margin:0">No invoices out this month.</p>')+
+    '<p class="small" style="margin:0">Fee earned = '+S.settings.factorFee+'% of the advance for each invoice still out during the month. The fee is received in one go when the debtor pays.</p>';
+}
+function closeModal(){document.getElementById('modal').innerHTML='';MODAL=null}
+const opt=(v,l,sel)=>'<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(l)+'</option>';
+const field=(id,label,input)=>'<div class="f"><label for="'+id+'">'+label+'</label>'+input+'</div>';
+const inp=(id,val,type='text',extra='')=>'<input class="in" id="'+id+'" name="'+id+'" type="'+type+'" value="'+esc(val)+'" '+extra+'>';
+
+/* ===== Navigation ===== */
+function route(){return(location.hash||'#pool').slice(1)}
+function renderNav(b){
+  const r=route(),n=alertsList(b).length;
+  const sect=r.startsWith('customer')?'companies':r.split('-')[0];
+  const a=(h,l,extra='')=>'<a href="#'+h+'" class="'+(sect===h?'on':'')+'"'+(sect===h?' aria-current="page"':'')+'><span>'+l+'</span>'+extra+'</a>';
+  document.getElementById('nav').innerHTML='<div class="brand"><b><i></i>Fund &amp; Loan</b><span>CapBoost · Capbridge-i</span></div>'+
+    '<div class="sec">FUND</div>'+a('pool','Pool &amp; Allocation',n?'<span class="badge" title="Active alerts">'+n+'</span>':'')+a('dashboard','Fund Dashboard')+
+    '<div class="sec">CUSTOMERS</div>'+a('companies','Customers &amp; Cases')+a('new','+ New Customer')+a('accounts','Specific Account')+
+    '<div class="sec">LOAN PRODUCTS</div>'+a('capboost','CapBoost',cbOverdue().length?'<span class="badge" title="Cases overdue 7+ days">'+cbOverdue().length+'</span>':'')+a('factoring','Capbridge-i',debtorConc().filter(d=>d.over).length?'<span class="badge" title="Debtors over concentration limit">'+debtorConc().filter(d=>d.over).length+'</span>':'')+
+    '<div class="sec">RECORDS</div>'+a('ledger','Ledger')+a('settings','Settings')+
+    '<div class="navfoot"><span>Prototype · sample data<br>As of '+fd(AS_OF)+'</span><button type="button" data-act="reset">Reset sample data</button></div>';
+}
+
+/* ===== Views ===== */
+function vPool(b){
+  const act=S.funds.filter(f=>f.status==='active');
+  const mth=sum(act,f=>f.principal*f.rate/1200),blend=b.principal?sum(act,f=>f.principal*f.rate)/sum(act,f=>f.principal):0;
+  const plans=maturityPlans(b);
+  const split=f=>S.ledger.filter(l=>l.type==='allocation'&&l.ref===f.id).map(l=>esc(entLabel(l.to).replace(' (sample)',''))+' '+shortN(l.amount)+(l.rate!=null?' @ '+l.rate+'%':'')).join(' · ');
+  const inv=S.funds.map(f=>{const mat=maturity(f),p=plans.find(x=>x.f===f);
+    const sp=split(f);return '<tr><td>'+esc(invName(f.investorId))+(f.history&&f.history.length?' <span class="small">rolled ×'+f.history.length+'</span>':'')+(sp?'<div class="small">→ '+sp+'</div>':'')+'</td><td class="r num">'+fmt(f.principal)+'</td><td class="r num">'+f.rate.toFixed(2)+'%</td><td class="r num">'+fmt(r2(f.principal*f.rate/1200))+'</td><td>'+fd(f.start)+'</td><td>'+f.tenor+' mths</td><td>'+
+      (f.status==='active'&&p&&p.inWindow?chip(fd(mat)+' · in '+p.ml.toFixed(1)+' mths','warn'):fd(mat))+'</td><td>'+(f.payoutDay>=31?'Last day':f.payoutDay+'th')+'</td><td>'+(f.status==='active'?chip('Active','ok'):chip('Principal repaid '+fds(f.repaidOn),'mute'))+'</td></tr>'}).join('');
+  const cos=S.companies.map(c=>{const u=b.usage(c.id),base=S.settings.cofBase==='allocated'?(b.alloc[c.id]||0):(b.dep[c.id]||0);
+    return '<tr><td>'+esc(c.name)+'<div class="small">'+esc(coDesc(c))+'</div></td><td class="r num">'+fmt(b.alloc[c.id]||0)+'</td><td class="r num">'+fmt(b.dep[c.id]||0)+'</td><td class="r num">'+fmt(b.avail(c.id))+'</td><td><div class="usage">'+bar(u,c.threshold)+'<span class="num">'+pct(u)+'</span>'+(u>=c.threshold?chip('Alert','warn'):'')+'</div></td><td class="r num">'+b.coRate(c.id).toFixed(2)+'%</td><td class="r num">'+fmt(cofMonthly(b,c))+'</td></tr>'}).join('');
+  const fundTypes=['investor_in','allocation','recall','investor_principal_repaid','investor_profit_payout','cof_transfer'];
+  const mv=S.ledger.filter(l=>fundTypes.includes(l.type)).sort((x,y)=>y.date<x.date?-1:y.date>x.date?1:y.id-x.id).slice(0,8);
+  const out=['allocation','investor_profit_payout','investor_principal_repaid'];
+  const cofM=r2(sum(S.companies,c=>cofMonthly(b,c)));
+  return head('Module 1 · Fund Management','Pool &amp; Allocation '+chip('Sample data'),
+      (b.idle>0.5?'<button class="btn or" data-act="allocate">Allocate '+rm(b.idle)+'</button>':'')+'<button class="btn" data-act="moveCo">Move between companies</button><button class="btn pri" data-act="addFund">+ Add investor fund</button>')+
+    '<div class="kpis">'+kpi('Total pool',rm(b.principal),act.length+' investor funds · '+(b.idle>0.5?rm(b.idle)+' not yet allocated':'all allocated to '+S.companies.filter(c=>(b.alloc[c.id]||0)>0).length+' companies'),b.idle>0.5?'warn':'')+
+      kpi('Blended cost of fund',pct(blend,2)+' p.a.',rm(mth)+' / month to investors')+kpi('COF from companies',rm(cofM)+' / mth',(cofM-mth>=0?'+':'−')+rm(Math.abs(r2(cofM-mth)))+' vs investor payout',cofM<mth?'bad':'good')+'</div>'+
+    alertsHTML(alertsList(b))+
+    '<section class="card"><div class="hd"><h2>Investors (fund in)</h2><span class="hint">Monthly = profit (COF %) only · principal returned in full at maturity</span></div><div class="tw"><table><thead><tr><th>Investor</th><th class="r">Amount</th><th class="r">COF % p.a.</th><th class="r">Monthly profit</th><th>Start</th><th>Tenor</th><th>Maturity (principal back)</th><th>Payout day</th><th>Status</th></tr></thead><tbody>'+inv+
+      '<tr class="tot"><td>Total active</td><td class="r num">'+fmt(sum(act,f=>f.principal))+'</td><td class="r num">'+blend.toFixed(2)+'%</td><td class="r num">'+fmt(r2(mth))+'</td><td colspan="5"></td></tr></tbody></table></div></section>'+
+    '<section class="card"><div class="hd"><h2>Company allocation (fund out)</h2><span class="hint">COF charged on <b>'+S.settings.cofBase+'</b> amount · <a href="#settings">change</a></span></div><div class="tw"><table><thead><tr><th>Company</th><th class="r">Allocated</th><th class="r">Deployed (loans out)</th><th class="r">Available</th><th>Usage</th><th class="r">Avg COF % p.a.</th><th class="r">COF charge / mth</th></tr></thead><tbody>'+cos+
+      '<tr class="tot"><td>Total</td><td class="r num">'+fmt(b.allocT)+'</td><td class="r num">'+fmt(b.depT)+'</td><td class="r num">'+fmt(r2(b.allocT-b.depT))+'</td><td class="num">'+pct(b.allocT?b.depT/b.allocT*100:0)+'</td><td></td><td class="r num">'+fmt(r2(sum(S.companies,c=>cofMonthly(b,c))))+'</td></tr></tbody></table></div></section>'+
+    '<section class="card"><div class="hd"><h2>Recent fund movements</h2><a href="#ledger">Full ledger</a></div><div class="list">'+
+      mv.map(l=>'<div class="li"><span>'+fds(l.date)+' · '+esc(entLabel(l.from))+' → '+esc(entLabel(l.to))+' <span class="small">'+TYPE[l.type]+'</span></span><span class="num">'+(out.includes(l.type)?'':'+')+fmt(l.amount)+'</span></div>').join('')+'</div></section>';
+}
+/* Company cash on hand up to a date: money in from pool + repayments + charges, less disbursed, COF paid and recalls.
+   Write-offs are non-cash; factoring rebates pass straight through from debtor to client. */
+const CASH_IN={allocation:1,repayment_principal:1,repayment_profit:1,other_charge:1},CASH_OUT={disbursement:1,cof_transfer:1,recall:1};
+function coCash(id,upto){const k='co:'+id;let c=0;for(const l of S.ledger){if(l.date>upto)continue;if(CASH_IN[l.type]&&l.to===k)c+=l.amount;else if(CASH_OUT[l.type]&&l.from===k)c-=l.amount}return r2(c)}
+function coFlowHTML(ym,b,m){
+  const[y,mo]=ym.split('-').map(Number),ms=iso(y,mo,1),me=iso(y,mo,dim(y,mo)),cur=ym>=ymOf(AS_OF),asAt=me<AS_OF?me:AS_OF;
+  const inM=l=>l.date>=ms&&l.date<=me;
+  const rows=S.companies.map(c=>{const id='co:'+c.id,L2=S.ledger.filter(inM);
+    const g=(t,side)=>r2(sum(L2.filter(l=>l.type===t&&l[side]===id),l=>l.amount));
+    const fromPool=g('allocation','to'),repP=g('repayment_principal','to'),repF=r2(g('repayment_profit','to')+g('other_charge','to'));
+    const disb=g('disbursement','from'),recall=g('recall','from'),cofPosted=g('cof_transfer','from');
+    const mc=m.cos.find(x=>x.c.id===c.id),cofDue=!mc.posted&&mc.cof>0?mc.cof:0;
+    const toCollect=cur?r2(sum(S.cases.filter(k=>k.companyId===c.id),k=>sum(k.rows.filter(r=>ymOf(r.due)===ym),owe))+sum(S.invoices.filter(i=>i.companyId===c.id&&i.status==='funded'&&ymOf(i.debtorDue)===ym),i=>i.advanced+i.advanced*S.settings.factorFee/100)):0;
+    const tin=r2(fromPool+repP+repF),tout=r2(disb+cofPosted+recall);
+    return{c,fromPool,repP,repF,disb,recall,cofPosted,cofDue,toCollect,tin,tout,net:r2(tin-tout),cash:coCash(c.id,asAt)}});
+  const T=k=>r2(sum(rows,r=>r[k])),mx=Math.max(1,...rows.map(r=>Math.max(r.tin,r.tout)));
+  const n=v=>v?fmt(v):'—';
+  return '<section class="card"><div class="hd"><h2>Company inflow &amp; outflow · '+ymLabel(ym)+'</h2><span class="hint">Actual money movements from the ledger</span></div>'+
+    '<div class="tw"><table><thead><tr><th rowspan="2">Company</th><th colspan="3" class="r" style="color:var(--good)">Inflow</th><th colspan="4" class="r" style="color:var(--orange-ink)">Outflow</th><th rowspan="2" class="r">Net</th><th rowspan="2"></th>'+(cur?'<th rowspan="2" class="r">Still to collect</th>':'')+'<th rowspan="2" class="r cashc">Cash on hand<div class="small" style="text-transform:none;letter-spacing:0;font-weight:400">as at '+fd(asAt)+'</div></th></tr>'+
+    '<tr><th class="r">From pool</th><th class="r">Repayment · principal</th><th class="r">Repayment · profit</th><th class="r">Disbursed</th><th class="r">COF to pool</th><th class="r">Back to pool</th><th class="r">Total out</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td>'+esc(r.c.name)+'<div class="small">'+esc(coDesc(r.c))+'</div></td><td class="r num">'+n(r.fromPool)+'</td><td class="r num">'+n(r.repP)+'</td><td class="r num">'+n(r.repF)+'</td>'+
+      '<td class="r num">'+n(r.disb)+'</td><td class="r num">'+(r.cofPosted?fmt(r.cofPosted):r.cofDue?'<span class="small">'+fmt(r.cofDue)+' due</span>':'—')+'</td><td class="r num">'+n(r.recall)+'</td><td class="r num">'+n(r.tout)+'</td>'+
+      '<td class="r num" style="font-weight:600;color:'+(r.net<0?'var(--orange-ink)':r.net>0?'var(--good)':'inherit')+'">'+(r.net>0?'+':'')+(r.net?fmt(r.net):'—')+'</td>'+
+      '<td style="min-width:110px"><div style="display:grid;gap:3px" title="In vs out"><div class="bar full" style="height:6px"><i style="width:'+(r.tin/mx*100).toFixed(1)+'%;background:var(--good)"></i></div><div class="bar full" style="height:6px"><i class="hot" style="width:'+(r.tout/mx*100).toFixed(1)+'%"></i></div></div></td>'+
+      (cur?'<td class="r num">'+n(r.toCollect)+'</td>':'')+'<td class="r num cashc" style="'+(r.cash<0?'color:var(--bad)':'')+'">'+fmt(r.cash,0)+'</td></tr>').join('')+
+    '<tr class="tot"><td>All companies</td><td class="r num">'+n(T('fromPool'))+'</td><td class="r num">'+n(T('repP'))+'</td><td class="r num">'+n(T('repF'))+'</td><td class="r num">'+n(T('disb'))+'</td><td class="r num">'+n(T('cofPosted'))+'</td><td class="r num">'+n(T('recall'))+'</td><td class="r num">'+n(T('tout'))+'</td><td class="r num">'+(T('net')>0?'+':'')+n(T('net'))+'</td><td></td>'+(cur?'<td class="r num">'+n(T('toCollect'))+'</td>':'')+'<td class="r num cashc">'+fmt(T('cash'),0)+'</td></tr></tbody></table></div>'+
+    '<p class="small" style="margin:10px 0 0">Inflow = money from the pool + customer repayments received. Outflow = loans / advances disbursed + COF paid to pool + money returned to pool. '+(cur?'Still to collect = instalments and invoices due this month not yet received. ':'')+'COF shows “due” until posted. Cash on hand = everything received up to that date (from pool, repayments, charges) less loans disbursed, COF paid and money returned to pool.</p></section>';
+}
+function poolCheckHTML(ym,m){
+  const inM=l=>ymOf(l.date)===ym;
+  const cofIn=r2(sum(S.ledger.filter(l=>l.type==='cof_transfer'&&inM(l)),l=>l.amount));
+  const paid=r2(sum(m.pays.filter(p=>p.paid),p=>p.amt));
+  const profIn=r2(sum(S.ledger.filter(l=>(l.type==='repayment_profit'||l.type==='other_charge')&&inM(l)&&l.to.startsWith('co:')),l=>l.amount));
+  const mx=Math.max(m.recovered,m.payable,1),R=v=>fmt(Math.round(v),0),gap=m.surplus<0;
+  const bar=(label,v,cls,sub)=>'<div><div class="top"><span>'+label+'</span><span class="num">'+R(v)+'</span></div><div class="trk"><i class="'+cls+'" style="width:'+(v/mx*100).toFixed(1)+'%"></i></div><div class="small" style="margin-top:4px">'+sub+'</div></div>';
+  return '<section class="card"><div class="hd"><h2>Pool check · '+ymLabel(ym)+'</h2></div>'+
+    '<p class="small" style="margin:0 0 12px">Companies pay cost of fund (COF) into the pool; the pool pays investors their monthly profit. COF due must cover investor profit.</p>'+
+    '<div class="hbars">'+
+    bar('COF due from companies',m.recovered,'o',m.cos.filter(c=>c.cof>0).map(c=>esc(c.c.name.split(' (')[0])+' '+R(c.cof)).join(' · ')+'<br>Received so far: '+(cofIn?R(cofIn):'none yet')+' (posted at month end)')+
+    bar('Investor profit payable',m.payable,'m','Paid so far: '+(paid?R(paid):'none yet'))+
+    '</div>'+
+    '<div class="top" style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:600"><span>'+(gap?'Pool gap':'Pool surplus')+'</span><span class="num" style="color:var(--'+(gap?'bad':'good')+')">'+(gap?'−':'+')+R(Math.abs(m.surplus))+'</span></div>'+
+    '<p class="note">'+(gap?'COF due is less than investor profit — top up before the payout date.':'COF due covers investor profit this month.')+
+    ' For reference: companies expect '+R(m.income)+' profit income this month ('+R(profIn)+' received so far). COF is charged on allocated money, so it is owed even when a company earns less.</p></section>';
+}
+function vDashboard(b){
+  const ym=ui.month,m=monthFig(ym,b),plans=maturityPlans(b);
+  const months=[];for(let i=-3;i<=5;i++)months.push(ymOf(addM('2026-10-01',i)));
+  const allPosted=m.cos.every(c=>c.posted),mx=Math.max(m.income,m.recovered,m.payable,1);
+  const pays=m.pays.map(p=>{const dd=days(AS_OF,p.date);const st=p.paid?chip('Paid','good'):dd<0?chip('Overdue','bad'):dd===0?chip('Due today','warn'):chip('Scheduled');
+    return '<tr><td>'+esc(invName(p.f.investorId))+'</td><td>'+fds(p.date)+'</td><td class="r num">'+fmt(p.amt)+'</td><td>'+st+'</td><td class="r">'+(p.paid?'':'<button class="btn sm" data-act="payProfit" data-f="'+p.f.id+'" data-ym="'+ym+'">Mark paid</button>')+'</td></tr>'}).join('');
+  const mats=S.funds.map(f=>{const p=plans.find(x=>x.f===f);
+    if(f.status!=='active')return '<tr><td>'+esc(invName(f.investorId))+'</td><td>'+fd(maturity(f))+'</td><td class="r num">'+fmt(f.principal)+'</td><td class="r num">—</td><td>Repaid '+fd(f.repaidOn)+'</td><td>'+chip('Repaid','mute')+'</td><td></td></tr>';
+    const plan=p.inWindow?(p.parts.map(x=>x[0]+' '+shortN(x[1])).join(' + ')+(p.short>0?' · <b>short '+shortN(p.short)+'</b>':'')):'—';
+    const st=p.ml<0?chip('Past due','bad'):p.inWindow?(p.short>0?chip('Shortfall','bad'):chip('Plan needed','warn')):chip('Not yet');
+    return '<tr><td>'+esc(invName(f.investorId))+'</td><td>'+fd(p.mat)+'</td><td class="r num">'+fmt(f.principal)+'</td><td class="r num">'+p.ml.toFixed(1)+'</td><td style="white-space:normal;min-width:240px">'+plan+'</td><td>'+st+'</td><td class="r"><div class="acts" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn sm" data-act="rollover" data-f="'+f.id+'">Roll over</button><button class="btn sm" data-act="repayPrincipal" data-f="'+f.id+'">Mark repaid</button></div></td></tr>'}).join('');
+  const pl=m.cos.map(c=>'<tr><td>'+esc(c.c.name)+'</td><td class="r num">'+fmt(c.dep)+'</td><td class="r num">'+fmt(c.cb)+'</td><td class="r num">'+fmt(c.fee)+'</td><td class="r num">'+fmt(c.inc)+'</td><td class="r num">'+fmt(c.cof)+'</td><td class="r num">'+fmt(c.net)+'</td><td class="r num">'+pct(c.inc?c.net/c.inc*100:0)+'</td><td>'+(c.posted?chip('COF posted','good'):chip('Not posted'))+'</td></tr>').join('');
+  return head('Module 1 · Fund Management','Fund Dashboard '+chip('Sample data'),
+      '<label for="mon" class="small">Month</label><select id="mon" class="in" data-ui="month">'+months.map(x=>opt(x,ymLabel(x),x===ym)).join('')+'</select>'+
+      '<button class="btn pri" data-act="postCof" data-ym="'+ym+'"'+(allPosted?' disabled':'')+'>'+(allPosted?'COF posted for '+ymLabel(ym):'Post COF transfers · '+ymLabel(ym))+'</button>')+
+    '<div class="kpis">'+kpi('Investor profit payable · '+ymLabel(ym),rm(m.payable,0),'Profit only · principal paid at maturity')+
+      kpi('Company profit expected',rm(m.income,0),'Instalment profit due + factoring fee this month')+
+      kpi('COF due from companies',rm(m.recovered,0),m.cos.filter(c=>c.cof>0).length+' companies · paid into pool at month end')+
+      kpi('Pool surplus / (gap)',(m.surplus>=0?'+':'−')+rm(Math.abs(m.surplus),0),m.surplus<0?'Pool gap — fix before payout date':'COF due − investor profit',m.surplus<0?'bad':'good')+'</div>'+
+    coFlowHTML(ym,b,m)+
+    '<section class="card"><div class="hd"><h2>Company P&amp;L after cost of fund · '+ymLabel(ym)+'</h2><span class="hint">COF on '+S.settings.cofBase+' amount</span></div><div class="tw"><table><thead><tr><th>Company</th><th class="r">Deployed</th><th class="r">CapBoost profit</th><th class="r">Capbridge-i fee</th><th class="r">Total income</th><th class="r">COF charge</th><th class="r">Net profit</th><th class="r">Margin</th><th>Status</th></tr></thead><tbody>'+pl+
+      '<tr class="tot"><td>Total</td><td class="r num">'+fmt(b.depT)+'</td><td class="r num">'+fmt(r2(sum(m.cos,c=>c.cb)))+'</td><td class="r num">'+fmt(r2(sum(m.cos,c=>c.fee)))+'</td><td class="r num">'+fmt(m.income)+'</td><td class="r num">'+fmt(m.cofT)+'</td><td class="r num">'+fmt(r2(m.income-m.cofT))+'</td><td class="r num">'+pct(m.income?(m.income-m.cofT)/m.income*100:0)+'</td><td></td></tr></tbody></table></div>'+
+      '<p class="small" style="margin:10px 0 0">CapBoost profit = profit portion of instalments due in the month. Capbridge-i fee = fee (ujrah) on invoices funded during the month. COF uses current balances.</p></section>'+
+    '<div class="grid2">'+    poolCheckHTML(ym,m)+
+    '<section class="card"><div class="hd"><h2>Profit payouts · '+ymLabel(ym)+'</h2></div><div class="tw"><table><thead><tr><th>Investor</th><th>Due</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>'+(pays||'<tr><td colspan="5" class="small">No payouts this month</td></tr>')+
+      '<tr class="tot"><td>Total</td><td></td><td class="r num">'+fmt(m.payable)+'</td><td colspan="2"></td></tr></tbody></table></div></section></div>'+
+    '<section class="card"><div class="hd"><h2>Principal maturities (bullet repayment)</h2><span class="hint">Alert '+S.settings.maturityMonths+' months before · funding plan = recall undeployed money from companies (largest first), earliest maturity first</span></div><div class="tw"><table><thead><tr><th>Investor</th><th>Maturity</th><th class="r">Principal</th><th class="r">Months left</th><th>Funding plan</th><th>Status</th><th></th></tr></thead><tbody>'+mats+'</tbody></table></div></section>';
+}
+function coStats(c){const cs=S.cases.filter(k=>k.companyId===c.id),ivs=S.invoices.filter(i=>i.companyId===c.id),infos=cs.map(caseInfo);
+  const funded=ivs.filter(i=>i.status==='funded');
+  return{custs:new Set(cs.map(k=>k.customerId).concat(ivs.map(i=>i.clientId))).size,active:infos.filter(x=>x.status!=='Settled').length,odCases:infos.filter(x=>x.overdue>0).length,
+    funded:funded.length,odInv:funded.filter(i=>i.debtorDue<AS_OF).length,cbOut:r2(sum(infos,x=>x.principalOut)),cbIssued:r2(sum(cs,k=>k.amount)),fOut:r2(sum(funded,i=>i.advanced)),odAmtCase:r2(sum(infos,x=>x.overdue||0)),odAmtInv:r2(sum(funded.filter(i=>i.debtorDue<AS_OF),i=>i.advanced))}}
+function coCard(c,b,href,product){const u=b.usage(c.id),st=coStats(c);
+  const stats=product==='capboost'?[['Customers',new Set(S.cases.filter(k=>k.companyId===c.id).map(k=>k.customerId)).size],['Active cases',st.active],['Overdue',st.odCases,st.odAmtCase]]:product==='factoring'?[['Funded out',shortN(st.fOut)],['Funded invoices',st.funded],['Overdue',st.odInv,st.odAmtInv]]:[['Customers',st.custs],['Active cases',st.active+st.funded],['Overdue',st.odCases+st.odInv,r2(st.odAmtCase+st.odAmtInv)]];
+  return '<a class="co" href="'+href+'"><div class="top"><div class="logo">'+esc(c.short)+'</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:17px">'+esc(c.name)+'</div><div class="small">'+esc(coDesc(c))+'</div></div>'+(product==='capboost'?'':chip(pct(u)+' used',u>=c.threshold?'warn':'ok'))+'</div>'+
+    (product==='capboost'?'<div class="stats" style="border-top:0;padding-top:0;grid-template-columns:repeat(2,minmax(0,1fr))"><div><span>Total issued</span><b class="num">RM '+fmt(st.cbIssued)+'</b></div><div><span>Outstanding (still out)</span><b class="num">RM '+fmt(st.cbOut)+'</b></div></div>':
+    '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span class="small">Deployed / allocated (all products)</span><span class="num">'+shortN(b.dep[c.id]||0)+' / '+shortN(b.alloc[c.id]||0)+'</span></div>'+bar(u,c.threshold,true)+'</div>')+
+    '<div class="stats">'+stats.map(([l,v,amt],i)=>'<div><span>'+l+'</span><b'+(i===2&&v?' style="color:var(--orange-ink)"':'')+'>'+v+'</b>'+(i===2?'<div class="num" style="font-size:13px;font-weight:600;margin-top:2px;color:'+(amt?'var(--orange-ink)':'var(--muted)')+'">RM '+fmt(amt||0,0)+'</div>':'')+'</div>').join('')+'</div><div class="go">Open →</div></a>'}
+function noProd(){const n=S.companies.filter(c=>!(c.products||[]).length);return n.length?'<p class="small" style="margin:0">Not listed (no lending products): '+n.map(c=>esc(c.name)+(c.purpose?' — '+esc(c.purpose):'')).join(' · ')+' · <a href="#settings">Company setup</a></p>':''}
+function vCompanies(b){const cs=lending();
+  return head('Module 2 · Customer Management','Select company '+chip('Sample data'),'<a class="btn pri" href="#new">+ New customer</a>','Choose which company’s customers and cases to work on')+
+    (cs.length?'<div class="cos">'+cs.map(c=>coCard(c,b,'#customers-'+c.id)).join('')+'</div>'+(cs.length>1?'<a href="#customers-all" style="font-weight:600">View all companies combined →</a>':''):'<section class="card">No company offers CapBoost or Capbridge-i yet. Turn a product on in <a href="#settings">Settings → Company setup</a>.</section>')+noProd();
+}
+function vPicker(b,product){const cs=S.companies.filter(c=>offers(c,product));
+  return head((product==='capboost'?'Module 3':'Module 4')+' · Product',esc(PRODUCTS[product])+' · select company '+chip('Sample data'),'','Pick the company whose '+PRODUCTS[product]+' book you want. Only companies with '+PRODUCTS[product]+' switched on are listed.')+
+    (cs.length?'<div class="cos">'+cs.map(c=>coCard(c,b,'#'+product+'-'+c.id,product)).join('')+'</div>'+(cs.length>1?'<a href="#'+product+'-all" style="font-weight:600">View all companies combined →</a>':''):'<section class="card">No company offers '+PRODUCTS[product]+'. Switch it on in <a href="#settings">Settings → Company setup</a>.</section>')+noProd();
+}
+function scopeCos(scope,product){return scope==='all'?S.companies.filter(c=>offers(c,product)):[coById(scope)].filter(c=>offers(c,product))}
+function scopeSel(product,scope){const cs=S.companies.filter(c=>offers(c,product));
+  return '<label for="psw" style="position:absolute;left:-9999px">Switch company</label><select id="psw" class="in" data-ui="psw" data-p="'+product+'">'+cs.map(c=>opt(c.id,c.name,c.id===scope)).join('')+(cs.length>1?opt('all','All companies',scope==='all'):'')+'</select>'}
+function custRowsHTML(coId){
+  let rows=S.customers.map(cu=>custSummary(cu,coId)).filter(Boolean);
+  const q=norm(ui.q),qd=digits(ui.q);
+  if(q)rows=rows.filter(x=>norm(x.cu.name).includes(q)||norm(x.cu.director).includes(q)||(qd.length>=3&&(digits(x.cu.ssm).includes(qd)||digits(x.cu.phone).includes(qd)||digits(x.cu.ic).includes(qd))));
+  if(ui.st!=='all')rows=rows.filter(x=>x.status===ui.st);
+  const srt={due:(a,b)=>(a.next||'9')<(b.next||'9')?-1:1,out:(a,b)=>b.outstanding-a.outstanding,name:(a,b)=>a.cu.name.localeCompare(b.cu.name)}[ui.sort];
+  rows.sort((a,b)=>(b.overdue>0)-(a.overdue>0)||srt(a,b));
+  if(!rows.length)return '<tr><td colspan="9" class="small">No customers match. Clear the search or <a href="#new">add a new customer</a>.</td></tr>';
+  return rows.map(x=>'<tr><td><a class="nm" href="#customer-'+x.cu.id+'">'+esc(x.cu.name)+'</a><div class="small">'+(x.others.length?'<span style="color:var(--orange-ink)">Also in '+x.others.map(o=>coById(o).name.split(' (')[0]).join(', ')+'</span>':'SSM '+esc(x.cu.ssm))+'</div></td><td>'+esc(x.cu.industry)+'</td><td class="r num">'+x.cases+'</td><td class="r num">'+fmt(x.total)+'</td><td class="r num">'+fmt(x.outstanding)+'</td><td>'+fds(x.next)+'</td><td class="r num">'+(x.next?fmt(x.nextAmt):'—')+'</td><td>'+(x.overdue>0?chip('RM '+fmt(x.overdue)+' · '+x.dpd+'d',x.dpd>=60?'bad':'warn'):'—')+'</td><td>'+chip(x.status,statusChip(x.status))+'</td></tr>').join('');
+}
+function vCustomers(b,coId){
+  ui.co=coId;const c=coById(coId),all=coId==='all';
+  const rows=S.customers.map(cu=>custSummary(cu,coId)).filter(Boolean);
+  const out=sum(rows,x=>x.outstanding),od=rows.filter(x=>x.overdue>0);
+  const alloc=all?b.allocT:(b.alloc[coId]||0),dep=all?b.depT:(b.dep[coId]||0);
+  return head('<a href="#companies">Companies</a> › '+(all?'All companies':esc(c.name)),(all?'All companies':esc(c.name))+' · Customers '+chip('Sample data'),
+      '<label for="cosw" class="small" style="position:absolute;left:-9999px">Switch company</label><select id="cosw" class="in" data-ui="cosw">'+lending().map(x=>opt(x.id,x.name,x.id===coId)).join('')+opt('all','All companies',all)+'</select><a class="btn pri" href="#new">+ New customer</a>')+
+    '<div class="kpis">'+kpi('Customers',rows.length,rows.filter(x=>x.status!=='Settled').length+' active · '+rows.filter(x=>x.status==='Settled').length+' settled')+
+      kpi('Active cases',sum(rows,x=>x.active),'Some customers have 2+ cases')+kpi('Total balance',rm(out),'Repayable remaining · principal deployed '+shortN(dep)+' of '+shortN(alloc))+
+      kpi('Overdue',rm(sum(od,x=>x.overdue)),od.length?od.length+' customer'+(od.length>1?'s':'')+' · up to '+Math.max(...od.map(x=>x.dpd))+' days':'None',od.length?'warn':'')+'</div>'+
+    '<section class="card"><div class="toolbar"><label for="q" style="position:absolute;left:-9999px">Search customers</label><input id="q" class="in grow" placeholder="Search name, SSM, director, phone" value="'+esc(ui.q)+'" data-ui="q" autocomplete="off">'+
+      '<label for="st" style="position:absolute;left:-9999px">Status</label><select id="st" class="in" data-ui="st">'+[['all','All status'],['Active','Active'],['Overdue','Overdue'],['New','New'],['Settled','Settled']].map(([v,l])=>opt(v,l,ui.st===v)).join('')+'</select>'+
+      '<label for="srt" style="position:absolute;left:-9999px">Sort</label><select id="srt" class="in" data-ui="sort">'+[['due','Sort: next due date'],['out','Sort: balance (high → low)'],['name','Sort: name A–Z']].map(([v,l])=>opt(v,l,ui.sort===v)).join('')+'</select></div>'+
+      '<div class="tw"><table><thead><tr><th>Customer</th><th>Industry</th><th class="r">Cases</th><th class="r">Total financed</th><th class="r">Balance</th><th>Next due</th><th class="r">Next amount</th><th>Overdue</th><th>Status</th></tr></thead><tbody id="ctb">'+custRowsHTML(coId)+'</tbody></table></div>'+
+      '<p class="small" style="margin:10px 0 0">Overdue pinned to top · cross-company customers flagged in orange · click a name to open the customer</p></section>';
+}
+function rowStatus(r){const o=owe(r);if(o<=0.004)return r.waived>0?chip(recd(r)>0.004?'Settled · rest waived':'Profit waived','mute'):chip('Paid','good');if(r.due<AS_OF)return chip((recd(r)>0?'Part · ':'')+'Overdue '+days(r.due,AS_OF)+'d','warn');if(recd(r)>0)return chip('Part paid','ok');if(r.due===AS_OF)return chip('Due today','warn');return chip(days(AS_OF,r.due)<=31?'Due':'Upcoming','mute')}
+function vCustomer(b,id){
+  const cu=custById(id);if(!cu)return '<p>Customer not found. <a href="#companies">Back to companies</a></p>';
+  const cs=S.cases.filter(k=>k.customerId===id),ivs=S.invoices.filter(i=>i.clientId===id);
+  const backCo=cs[0]?cs[0].companyId:ivs[0]?ivs[0].companyId:'all';
+  let tabId=ui.tab[id];if(!cs.find(k=>k.id===tabId)){const open=cs.find(k=>caseInfo(k).status!=='Settled');tabId=(open||cs[0]||{}).id}
+  const k=cs.find(x=>x.id===tabId);
+  let caseHTML='';
+  if(k){const i=caseInfo(k),c=coById(k.companyId);
+    caseHTML='<section class="card"><div class="terms">'+
+      [['Product','CapBoost'],['Loan amount',rm(k.amount)],['Monthly rate (flat)',k.rate.toFixed(2)+'%'],['Tenure',k.tenure+' months'],['Start date',fd(k.start)],['Repay every',(k.day>=31?'Last day':k.day+(k.day===1?'st':k.day===2?'nd':k.day===3?'rd':'th'))+' of month'],['Instalment',rm(inst(k.rows[0]))],['Funded from',c.name+' pool']].map(([l,v])=>'<div class="kvp"><span>'+l+'</span><b class="num">'+v+'</b></div>').join('')+
+      '</div><div class="divider"></div><div class="terms">'+
+      [['Total repayable',fmt(i.total)],['Received',fmt(i.received)],['Balance',fmt(i.balance)],['Next due',i.next?fds(i.next.due)+' · RM '+fmt(owe(i.next)):'—'],['Overdue',i.overdue>0?'RM '+fmt(i.overdue)+' · '+i.dpd+'d':'—']].map(([l,v])=>'<div class="kvp"><span>'+l+'</span><b class="num">'+v+'</b></div>').join('')+
+      '<div class="kvp"><span>'+i.paidCount+' of '+k.tenure+' paid</span><div style="margin-top:8px">'+bar(i.paidCount/k.tenure*100,null,true)+'</div></div></div></section>'+
+      '<div class="g-wide"><section class="card"><div class="hd"><div><h2>Repayment schedule · '+k.ref+'</h2><span class="hint">Auto-generated from terms · last instalment absorbs rounding · each row editable</span></div>'+
+      (i.status==='Settled'?(k.settlement?chip('Settled early '+fds(k.settlement.date),'mute'):chip('Fully paid','good')):'<div class="acts"><button class="btn" data-act="repayCase" data-k="'+k.id+'">Repayment</button><button class="btn pri" data-act="settleCase" data-k="'+k.id+'">Settlement</button></div>')+'</div><div class="tw"><table><thead><tr><th>#</th><th>Due date</th><th class="r">Principal</th><th class="r">Profit</th><th class="r">Instalment</th><th class="r">Received</th><th>Date received</th><th>Status</th><th></th></tr></thead><tbody>'+
+      k.rows.map(r=>'<tr><td class="num">'+r.n+'</td><td>'+fd(r.due)+'</td><td class="r num">'+fmt(r.principal)+'</td><td class="r num">'+fmt(r.profit)+'</td><td class="r num">'+fmt(inst(r))+'</td><td class="r num">'+(recd(r)?fmt(recd(r)):'—')+'</td><td>'+(r.date?fd(r.date):'—')+'</td><td>'+rowStatus(r)+'</td><td><button class="btn sm" data-act="editRow" data-k="'+k.id+'" data-n="'+r.n+'">Edit</button></td></tr>').join('')+
+      '<tr class="tot"><td></td><td>Total</td><td class="r num">'+fmt(k.amount)+'</td><td class="r num">'+fmt(r2(sum(k.rows,r=>r.profit)))+'</td><td class="r num">'+fmt(i.total)+'</td><td class="r num">'+fmt(i.received)+'</td><td colspan="3"></td></tr></tbody></table></div></section>'+
+      ocrPanel(cu,k)+'</div>';
+  }
+  const ivHTML=ivs.length?'<section class="card"><div class="hd"><h2>Capbridge-i invoices</h2><a href="#factoring">Capbridge-i dashboard</a></div>'+invTable(ivs,true)+'</section>':'';
+  return head('<a href="#companies">Companies</a> › <a href="#customers-'+backCo+'">'+(backCo==='all'?'All':esc(coById(backCo).name))+' · Customers</a> › '+esc(cu.name),esc(cu.name)+' '+chip('Sample data'),
+      '<button class="btn" data-act="editCust" data-id="'+id+'">Edit customer</button><button class="btn" data-act="newInv" data-cl="'+id+'">+ Capbridge-i invoice</button><button class="btn pri" data-act="newCase" data-cu="'+id+'">+ New CapBoost case</button>',
+      'SSM '+esc(cu.ssm)+' · '+esc(cu.industry)+' · '+esc(cu.location)+' · Director '+esc(cu.director)+' · '+esc(cu.phone))+
+    (cs.length?'<div class="tabs" role="tablist" aria-label="CapBoost cases">'+cs.map(x=>{const st=caseInfo(x).status;return '<button class="tab'+(x.id===tabId?' on':'')+'" role="tab" aria-selected="'+(x.id===tabId)+'" data-act="tab" data-cu="'+id+'" data-k="'+x.id+'">'+x.ref+' · RM '+fmt(x.amount)+' '+chip(st,statusChip(st))+'</button>'}).join('')+'</div>':'')+
+    caseHTML+ivHTML+(!cs.length&&!ivs.length?'<section class="card"><p>No cases yet. Use <b>+ New CapBoost case</b> or <b>+ Capbridge-i invoice</b>.</p></section>':'');
+}
+function ocrMatch(o){
+  const ref=String(o.ref||'').trim().toUpperCase().replace(/\s+/g,' ');
+  const dup=ref?S.payments.find(p=>p.ref.toUpperCase().replace(/\s+/g,' ')===ref):null;
+  const pn=norm(o.payer);let cu=null;
+  if(pn.length>=3)cu=S.customers.find(c=>{const n=norm(c.name);return n&&(n.includes(pn)||pn.includes(n))});
+  let k=null,row=null;
+  if(cu){const open=S.cases.filter(x=>x.customerId===cu.id&&caseInfo(x).unpaid.length);
+    for(const x of open){const r=caseInfo(x).unpaid[0];if(Math.abs(owe(r)-num(o.amount))<0.01){k=x;row=r;break}}
+    if(!k&&open.length){k=open.find(x=>x.id===o.caseId)||open[0];row=caseInfo(k).unpaid[0]}}
+  return{dup,cu,k,row};
+}
+function ocrPanel(cu,k){
+  const o=ui.ocr&&ui.ocr.cust===cu.id?ui.ocr:null;
+  let body='<label class="drop" for="ocrfile">'+ICON.up+'<span>Drop or choose a cheque, payment slip or transfer screenshot</span><input id="ocrfile" type="file" accept="image/*,application/pdf" data-ocr="file"></label>'+
+    '<button class="btn sm" style="margin-top:8px" data-act="ocrSample" data-cu="'+cu.id+'" data-k="'+k.id+'">Use sample slip</button>';
+  if(o){const m=ocrMatch(o),amt=num(o.amount);
+    const confChip=(c,v)=>!v?chip('Empty'):c>=90?chip(c+'%','ok'):chip(c+'% · check','warn');
+    const f=(key,label)=>'<div class="fld"><label for="ocr-'+key+'">'+label+'</label><input class="in" id="ocr-'+key+'" data-ocr="'+key+'" value="'+esc(o[key])+'">'+confChip(o.conf[key],o[key])+'</div>';
+    let match,cls='ok',post=true;
+    if(!m.cu){match='No customer matched “'+esc(o.payer)+'”. Edit the payer name.';cls='warn';post=false}
+    else if(!m.k){match=esc(m.cu.name)+' has no open instalments.';cls='warn';post=false}
+    else{const due=owe(m.row),diff=r2(amt-due);
+      match=esc(m.cu.name)+' · '+m.k.ref+' · Instalment #'+m.row.n+' ('+fds(m.row.due)+', RM '+fmt(due)+' due)<br>'+
+        (Math.abs(diff)<0.01?chip('Exact amount','good'):diff<0?chip('Part payment · RM '+fmt(-diff)+' short','warn'):chip('Over payment · RM '+fmt(diff)+' extra → next instalments','warn'));}
+    if(m.dup){match+='<br>'+chip('Duplicate slip','bad')+' Reference already posted on '+fd(m.dup.date)+' ('+m.dup.caseId+', RM '+fmt(m.dup.amount)+')';cls='bad';post=false}
+    if(amt<=0)post=false;
+    body+='<div class="thumb">'+(o.img?'<img src="'+o.img+'" alt="Uploaded slip">':'<div class="ph" aria-hidden="true"></div>')+'<div><b>'+esc(o.file)+'</b><div class="small">Scanned · 4 fields detected</div></div></div>'+
+      '<div style="margin-top:8px">'+f('payer','Payer name')+f('amount','Amount (RM)')+f('date','Payment date')+f('ref','Reference')+'</div>'+
+      '<div class="match '+cls+'"><div class="lbl" style="margin-bottom:4px">Auto-matched to</div>'+match+'</div>'+
+      '<div class="acts" style="margin-top:12px"><button class="btn pri" data-act="ocrPost"'+(post?'':' disabled')+'>Confirm &amp; post</button><button class="btn" data-act="ocrClear">Discard</button></div>';
+  }
+  return '<aside class="card" aria-label="Record payment"><div class="hd"><h2>Record payment (OCR)</h2></div>'+body+
+    '<p class="note">Prototype: OCR is simulated — fields are filled from the next open instalment. Nothing posts until you confirm. Try reference <b>CHQ 004498</b> to see the duplicate check.</p></aside>';
+}
+function invTable(list,showCo){
+  const st={submitted:chip('Submitted'),verified:chip('Debtor verified','ok'),funded:chip('Funded','ok'),collected:chip('Collected','good')};
+  return '<div class="tw"><table><thead><tr><th>Invoice</th>'+(showCo?'<th>Company</th>':'')+'<th>Client</th><th>Debtor</th><th class="r">Invoice amt</th><th class="r">Adv %</th><th class="r">Advanced</th><th class="r">Fee / mth</th><th>Debtor due</th><th class="r">Days left</th><th>Status</th><th></th></tr></thead><tbody>'+
+    list.slice().sort((a,b)=>({submitted:0,verified:1,funded:2,collected:3}[a.status]-{submitted:0,verified:1,funded:2,collected:3}[b.status])||(a.debtorDue<b.debtorDue?-1:1)).map(i=>{
+      const dl=i.status==='funded'?days(AS_OF,i.debtorDue):null;
+      const status=i.status==='funded'&&dl<0?chip('Overdue '+(-dl)+'d','warn'):i.status==='funded'&&dl<=14?chip('Due soon','warn'):i.status==='collected'?chip('Collected · rebate '+fmt(i.rebate),'good'):st[i.status];
+      const act=i.status==='submitted'?'<button class="btn sm" data-act="invVerify" data-i="'+i.id+'">Verify debtor</button>':i.status==='verified'?'<button class="btn sm pri" data-act="invFund" data-i="'+i.id+'">Fund advance</button>':i.status==='funded'?'<button class="btn sm" data-act="invCollect" data-i="'+i.id+'">Mark collected</button>':'';
+      return '<tr><td>'+i.no+'</td>'+(showCo?'<td>'+esc((coById(i.companyId)||{}).name||'')+'</td>':'')+'<td><a href="#customer-'+i.clientId+'">'+esc(custById(i.clientId).name)+'</a></td><td>'+esc(i.debtor)+'</td><td class="r num">'+fmt(i.amount)+'</td><td class="r num">'+i.advPct+'%</td><td class="r num">'+(i.fundedOn?fmt(i.advanced):'—')+'</td><td class="r num">'+(i.status==='funded'?fmt(r2(i.advanced*S.settings.factorFee/100)):'—')+'</td><td>'+fds(i.debtorDue)+'</td><td class="r num">'+(dl==null?'—':dl)+'</td><td>'+status+'</td><td>'+act+'</td></tr>'}).join('')+'</tbody></table></div>';
+}
+function vNew(){
+  if(!ui.nc)ui.nc={text:SAMPLE_PASTE,F:{},C:{},detected:false,file:''};
+  const n=ui.nc,F=n.F,C=n.C;
+  const dup=n.detected?findDup(F):null;
+  const st=k=>!F[k]?'mute':C[k]>=90?'ok':'warn';
+  const ch=k=>!n.detected?'':!F[k]?chip('Empty'):C[k]>=90?chip(C[k]+'%','ok'):chip(C[k]+'% · check','warn');
+  const fi=(k,label)=>'<div class="f"><label for="nc-'+k+'">'+label+' '+ch(k)+'</label><input class="in '+(n.detected&&F[k]?(st(k)==='ok'?'hit':'chk'):'')+'" id="nc-'+k+'" data-nc="'+k+'" value="'+esc(F[k]||'')+'"></div>';
+  const FK=['name','ssm','industry','address','director','ic','phone','email','amount','tenure','product','company','purpose'],found=FK.filter(k=>F[k]).length;
+  const chS=k=>n.detected&&F[k]?' '+(C[k]>=90?chip(C[k]+'%','ok'):chip(C[k]+'% · check','warn')):'';
+  return head('Module 2 · Customers','New customer','','Upload an application form or paste whatever you have. The system suggests field values; you check, save and create the case.')+
+    '<div class="grid2" style="align-items:start"><section class="card"><div class="hd"><h2>1 · Upload or paste</h2></div>'+
+      (n.form?'<div class="match ok" style="margin:0 0 14px;display:flex;gap:12px;align-items:flex-start">'+ICON.up+'<div style="flex:1;min-width:0"><b>Application form read: '+esc(n.form.file)+'</b><br>'+n.form.pages+' pages · company, director, facility and amount found. Check the fields on the right, then <b>Save &amp; create loan case</b>.</div><button class="btn sm" data-act="appClear">Clear</button></div>':
+       '<label class="drop" for="appform" style="flex-direction:column;padding:22px;margin-bottom:8px">'+ICON.up+'<b style="color:var(--ink)">Upload application form</b><span class="small">PDF or photo · the system reads the company, director and facility details and fills the form</span><input id="appform" type="file" accept="image/*,application/pdf" data-nc="appform"></label>'+
+       '<div class="acts" style="margin-bottom:16px"><button class="btn sm" data-act="appSample">Use sample application form</button></div>')+
+      '<p class="hint" style="margin:0 0 10px">'+(n.form?'Text read from the form (you can correct it and press Detect again)':'Or paste: WhatsApp message, email, SSM profile text, CTOS summary')+'</p>'+
+      '<label for="paste" style="position:absolute;left:-9999px">Pasted customer info</label><textarea id="paste" class="in" data-nc="text"'+(n.form?' style="min-height:300px"':'')+'>'+esc(n.text)+'</textarea>'+
+      '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="detect">Detect &amp; auto-fill</button><label class="btn" for="ssmimg">Upload SSM / IC image</label><input id="ssmimg" type="file" accept="image/*,application/pdf" data-nc="file" style="position:absolute;opacity:0;width:1px;height:1px">'+
+      '<button class="btn" data-act="pasteSample" data-which="dup">Try a duplicate</button></div>'+
+      (n.file?'<p class="note">'+esc(n.file)+' attached. Prototype: image OCR is not connected yet; in the build it fills the same fields.</p>':'')+
+      (n.detected?'<div class="match '+(dup?'bad':'ok')+'" style="margin-top:12px"><b>'+found+' of '+FK.length+' fields detected.</b> '+(dup?'Duplicate check: <b>'+esc(dup.name)+'</b> already exists with this '+(digits(dup.ssm)===digits(F.ssm)?'SSM':'IC')+'. <a href="#customer-'+dup.id+'">Open existing customer</a>':'Duplicate check: no existing customer with this SSM / IC.')+'</div>':'')+
+    '</section><section class="card"><div class="hd"><h2>2 · Review &amp; save</h2><div class="acts">'+chip('Auto-filled','ok')+chip('Please check','warn')+chip('Empty')+'</div></div>'+
+      '<h3>Company</h3><div class="form-grid" style="margin:8px 0 14px">'+fi('name','Company name')+fi('ssm','SSM no.')+fi('industry','Industry')+fi('address','Address')+'</div>'+
+      '<h3>Director / contact</h3><div class="form-grid" style="margin:8px 0 14px">'+fi('director','Director name')+fi('ic','IC no.')+fi('phone','Phone')+fi('email','Email')+'</div>'+
+      '<h3>Lead / request</h3><div class="form-grid" style="margin:8px 0 14px">'+fi('amount','Amount requested (RM)')+fi('tenure','Tenure (months)')+fi('purpose','Purpose')+
+      '<div class="f"><label for="nc-product">Product'+chS('product')+'</label><select class="in" id="nc-product" data-nc="product">'+opt('','— select —')+Object.keys(PRODUCTS).map(p=>opt(p,PRODUCTS[p],F.product===p)).join('')+'</select></div>'+
+      '<div class="f"><label for="nc-company">Company'+chS('company')+'</label><select class="in" id="nc-company" data-nc="company">'+opt('','— select —')+S.companies.filter(c=>F.product?offers(c,F.product):(c.products||[]).length).map(c=>opt(c.id,c.name,F.company===c.id)).join('')+'</select></div>'+
+      '<div class="f"><label for="nc-owner">Assigned to</label><select class="in" id="nc-owner" data-nc="owner">'+opt('Chloe','Chloe')+opt('Other','— other —',F.owner==='Other')+'</select></div></div>'+
+      '<div class="err" id="ncerr"></div><div class="acts"><button class="btn" data-act="saveCust">Save customer</button><button class="btn pri" data-act="saveCust" data-case="1">Save &amp; create loan case</button></div></section></div>';
+}
+function cbOverdue(ids){return S.cases.filter(k=>!ids||ids.includes(k.companyId)).map(k=>({k,i:caseInfo(k)})).filter(x=>x.i.dpd>=7).sort((a,b)=>b.i.dpd-a.i.dpd)}
+function cbOverdueHTML(ids){const od=cbOverdue(ids);if(!od.length)return '';
+  const sev=od.some(x=>x.i.dpd>=60)?'bad':'warn',n30=od.filter(x=>x.i.dpd>=30).length;
+  return '<div class="alerts" role="region" aria-label="Overdue cases"><div class="alert '+sev+'">'+ICON.warn+'<div style="flex:1;min-width:0"><b>'+od.length+' CapBoost case'+(od.length>1?'s':'')+' overdue 7+ days'+(n30?' · '+n30+' at 30+ days':'')+' · RM '+fmt(r2(sum(od,x=>x.i.overdue)))+'</b>'+
+    '<ul class="odl">'+od.map(x=>'<li><a href="#customer-'+x.k.customerId+'" data-act="tab" data-cu="'+x.k.customerId+'" data-k="'+x.k.id+'" data-nav="1" style="margin:0;font-weight:600">'+x.k.ref+'</a><span class="nm">'+esc(custById(x.k.customerId).name)+'</span><span class="num">'+x.i.dpd+' days</span><span class="num">RM '+fmt(x.i.overdue,0)+'</span></li>').join('')+'</ul></div></div></div>'}
+function cbMonthly(cs,scope){
+  const years=[...new Set(cs.map(x=>x.k.start.slice(0,4)).concat([AS_OF.slice(0,4)]))].sort();
+  const year=years.includes(ui.cbYear)?ui.cbYear:AS_OF.slice(0,4);
+  const keys=new Set(cs.map(x=>'case:'+x.k.id));
+  const rows=MON.map((mn,i)=>{const ym=year+'-'+String(i+1).padStart(2,'0'),iss=cs.filter(x=>ymOf(x.k.start)===ym);
+    return{mn,ym,n:iss.length,amt:sum(iss,x=>x.k.amount),
+      due:r2(sum(cs,x=>sum(x.k.rows.filter(r=>ymOf(r.due)===ym),r=>r.profit-(r.waived||0)))),
+      got:r2(sum(S.ledger.filter(l=>l.type==='repayment_profit'&&keys.has(l.from)&&ymOf(l.date)===ym),l=>l.amount)),
+      future:ym>ymOf(AS_OF),now:ym===ymOf(AS_OF)}});
+  const mx=Math.max(1,...rows.map(r=>r.amt)),T=k=>sum(rows,r=>r[k]);
+  return '<section class="card"><div class="hd"><h2>Monthly · cases issued &amp; profit</h2><div class="acts"><label for="cby" class="small">Year</label><select id="cby" class="in" data-ui="cbYear">'+years.map(y=>opt(y,y,y===year)).join('')+'</select></div></div>'+
+    '<div class="tw"><table><thead><tr><th>Month</th><th class="r">Cases issued</th><th class="r">Amount issued (RM)</th><th></th><th class="r">Profit due (RM)</th><th class="r">Profit received (RM)</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr class="rowclick" role="button" tabindex="0" data-act="cbMonth" data-ym="'+r.ym+'" data-scope="'+scope+'" aria-label="View cases for '+r.mn+' '+year+'"'+(r.future?' style="color:var(--muted)"':'')+'><td>'+r.mn+' '+year+(r.now?' '+chip('This month','ok'):'')+' <span class="rmore">View →</span></td><td class="r num">'+(r.n||'—')+'</td><td class="r num">'+(r.amt?fmt(r.amt):'—')+'</td><td style="width:22%">'+(r.amt?bar(r.amt/mx*100,null,true):'')+'</td><td class="r num">'+(r.due?fmt(r.due):'—')+'</td><td class="r num">'+(r.got?fmt(r.got):r.future?'':'—')+'</td></tr>').join('')+
+    '<tr class="tot"><td>Total '+year+'</td><td class="r num">'+T('n')+'</td><td class="r num">'+fmt(T('amt'))+'</td><td></td><td class="r num">'+fmt(r2(T('due')))+'</td><td class="r num">'+fmt(r2(T('got')))+'</td></tr></tbody></table></div>'+
+    '<p class="small" style="margin:10px 0 0">Amount issued = loans disbursed that month. Profit due = profit portion of instalments scheduled that month. Profit received = profit actually collected (from the ledger). Click a month to see its cases.</p></section>';
+}
+function vCapBoost(b,scope){
+  const cos=scopeCos(scope,'capboost');if(!cos.length)return vPicker(b,'capboost');
+  const ids=cos.map(c=>c.id),all=scope==='all',title=all?'All companies':cos[0].name;
+  const cs=S.cases.filter(k=>ids.includes(k.companyId)).map(k=>({k,i:caseInfo(k)}));
+  const act=cs.filter(x=>x.i.status!=='Settled'),mc=monthFig(ymOf(AS_OF),b).cos.filter(x=>ids.includes(x.c.id));
+  const out=r2(sum(act,x=>x.i.principalOut)),alloc=sum(ids,id=>b.alloc[id]||0);
+  const prof=r2(sum(mc,x=>x.cb)),cofShare=r2(sum(mc,x=>x.dep?x.cof*sum(act.filter(a=>a.k.companyId===x.c.id),a=>a.i.principalOut)/x.dep:0));
+  const odC=act.filter(x=>x.i.overdue>0),issued=r2(sum(cs,x=>x.k.amount)),bal=r2(sum(act,x=>x.i.balance));
+  const buckets=[['Current',x=>x.i.dpd===0],['1–30 days',x=>x.i.dpd>=1&&x.i.dpd<=30],['31–60 days',x=>x.i.dpd>=31&&x.i.dpd<=60],['60+ days',x=>x.i.dpd>60]].map(([l,f])=>{const g=act.filter(f);return[l,g.length,sum(g,x=>x.i.principalOut)]});
+  const mx=Math.max(1,...buckets.map(x=>x[2]));
+  const due7=[];act.forEach(x=>x.i.unpaid.forEach(r=>{const d=days(AS_OF,r.due);if(d>=0&&d<=7)due7.push({x,r})}));due7.sort((a,b)=>a.r.due<b.r.due?-1:1);
+  const pipe=ids.reduce((a,id)=>{const p=(S.pipeline||{})[id]||{};a.applied+=p.applied||0;a.approved+=p.approved||0;a.pending+=p.pending||0;return a},{applied:0,approved:0,pending:0});
+  const disbM=sum(cs.filter(x=>ymOf(x.k.start)===ymOf(AS_OF)),x=>x.k.amount);
+  return head('<a href="#capboost">CapBoost</a> › '+esc(title),'CapBoost · '+esc(title)+' '+chip('Sample data')+' '+tbc,
+      scopeSel('capboost',scope)+'<a class="btn" href="#customers-'+scope+'">Collections list</a><button class="btn pri" data-act="newCase" data-co="'+(all?'':scope)+'">+ New CapBoost case</button>','Draft pricing: flat monthly rate set per case. Confirm pricing, tenure range and repayment type.')+
+    '<div class="kpis">'+kpiC('cbList','data-kind="all" data-scope="'+scope+'"','Total issued',rm(issued),cs.length+' cases since start · '+rm(r2(issued-out))+' principal repaid')+kpi('Outstanding (still out)',rm(out),act.length+' active cases · '+rm(bal)+' incl. profit due','hl')+
+      kpi('Profit this month',rm(prof),'Net after COF share '+rm(r2(prof-cofShare)))+kpiC('cbList','data-kind="od" data-scope="'+scope+'"','Overdue',rm(r2(sum(odC,x=>x.i.overdue))),odC.length+' cases · '+pct(out?sum(odC,x=>x.i.principalOut)/out*100:0)+' of book',odC.length?'warn':'')+'</div>'+cbOverdueHTML(ids)+cbMonthly(cs,scope)+
+    '<div class="grid3"><section class="card"><div class="hd"><h2>Aging (principal by days past due)</h2></div><div class="hbars">'+buckets.map(([l,n,a],i)=>'<div><div class="top"><span>'+l+' · '+n+' case'+(n===1?'':'s')+'</span><span class="num">'+fmt(a)+'</span></div><div class="trk"><i class="'+(i?'o':'')+'" style="width:'+(a/mx*100).toFixed(1)+'%"></i></div></div>').join('')+'</div></section>'+
+    '<section class="card"><div class="hd"><h2>Due next 7 days</h2></div><div class="list">'+(due7.length?due7.map(d=>'<div class="li"><span>'+fds(d.r.due)+' · <a href="#customer-'+d.x.k.customerId+'">'+esc(custById(d.x.k.customerId).name)+'</a></span><span class="num">'+fmt(owe(d.r))+'</span></div>').join(''):'<div class="li small">Nothing due</div>')+
+      '<div class="li"><b>Total expected</b><b class="num">'+fmt(r2(sum(due7,d=>owe(d.r))))+'</b></div></div></section>'+
+    '<section class="card"><div class="hd"><h2>Pipeline</h2></div><div class="list"><div class="li"><span>Applied</span><b>'+pipe.applied+'</b></div><div class="li"><span>Approved</span><b>'+pipe.approved+'</b></div><div class="li"><span>Pending disbursement</span><b>'+pipe.pending+'</b></div><div class="li"><span>Disbursed this month</span><b class="num">'+fmt(disbM)+'</b></div></div></section></div>'+
+    '<section class="card"><div class="hd"><h2>Active cases</h2><span class="hint">Click a case to open it</span></div><div class="tw"><table><thead><tr><th>Case</th>'+(all?'<th>Company</th>':'')+'<th>Customer</th><th class="r">Amount</th><th class="r">Rate / mth</th><th>Tenure</th><th class="r">Principal out</th><th>Next due</th><th class="r">DPD</th><th>Status</th></tr></thead><tbody>'+
+      act.sort((a,b)=>b.i.dpd-a.i.dpd).map(x=>'<tr><td><a href="#customer-'+x.k.customerId+'" data-act="tab" data-cu="'+x.k.customerId+'" data-k="'+x.k.id+'" data-nav="1">'+x.k.ref+'</a></td>'+(all?'<td>'+esc(coById(x.k.companyId).name)+'</td>':'')+'<td>'+esc(custById(x.k.customerId).name)+'</td><td class="r num">'+fmt(x.k.amount)+'</td><td class="r num">'+x.k.rate.toFixed(1)+'%</td><td>'+x.k.tenure+' m</td><td class="r num">'+fmt(x.i.principalOut)+'</td><td>'+(x.i.next?fds(x.i.next.due):'—')+'</td><td class="r num">'+x.i.dpd+'</td><td>'+chip(x.i.status==='Active'?'Current':x.i.status,statusChip(x.i.status))+'</td></tr>').join('')+'</tbody></table></div></section>';
+}
+function concAlertHTML(ids,title){const over=debtorConc().filter(d=>d.over);if(!over.length)return '';
+  const local=ids?debtorConc(ids):[];
+  return '<div class="alerts" role="region" aria-label="Debtor concentration">'+over.map(d=>{const l=local.find(x=>x.debtor===d.debtor);
+    return '<div class="alert warn">'+ICON.warn+'<div><b>'+esc(d.debtor)+' is '+pct(d.p)+' of the group Capbridge-i book (limit '+S.settings.debtorLimit+'%)</b><span>RM '+fmt(d.amt)+' advanced'+(l?' · '+pct(l.p)+' of '+esc(title)+'’s book':'')+'. Hold new invoices on this debtor.</span></div></div>'}).join('')+'</div>'}
+function fctMonthly(invs,scope){
+  const fundedInv=invs.filter(i=>i.fundedOn);
+  const years=[...new Set(fundedInv.map(i=>i.fundedOn.slice(0,4)).concat([AS_OF.slice(0,4)]))].sort();
+  const year=years.includes(ui.fYear)?ui.fYear:AS_OF.slice(0,4);
+  const keys=new Set(invs.map(i=>'inv:'+i.no)),fee=S.settings.factorFee/100;
+  const rows=MON.map((mn,i)=>{const ym=year+'-'+String(i+1).padStart(2,'0'),[y,m]=ym.split('-').map(Number),ms=iso(y,m,1),me=iso(y,m,dim(y,m));
+    const f=fundedInv.filter(x=>ymOf(x.fundedOn)===ym);
+    return{mn,ym,n:f.length,inv:sum(f,x=>x.amount),adv:sum(f,x=>x.advanced),
+      acc:r2(sum(fundedInv.filter(x=>x.fundedOn<=me&&(!x.collectedOn||x.collectedOn>=ms)),x=>x.advanced*fee)),
+      got:r2(sum(S.ledger.filter(l=>l.type==='repayment_profit'&&keys.has(l.from)&&ymOf(l.date)===ym),l=>l.amount)),
+      future:ym>ymOf(AS_OF),now:ym===ymOf(AS_OF)}});
+  const mx=Math.max(1,...rows.map(r=>r.adv)),T=k=>sum(rows,r=>r[k]);
+  return '<section class="card"><div class="hd"><h2>Monthly · invoices funded &amp; fee</h2><div class="acts"><label for="fy" class="small">Year</label><select id="fy" class="in" data-ui="fYear">'+years.map(y=>opt(y,y,y===year)).join('')+'</select></div></div>'+
+    '<div class="tw"><table><thead><tr><th>Month</th><th class="r">Invoices funded</th><th class="r">Invoice amount (RM)</th><th class="r">Amount advanced (RM)</th><th></th><th class="r">Fee earned · accrued (RM)</th><th class="r">Fee received (RM)</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr class="rowclick" role="button" tabindex="0" data-act="fMonth" data-ym="'+r.ym+'" data-scope="'+scope+'" aria-label="View invoices for '+r.mn+' '+year+'"'+(r.future?' style="color:var(--muted)"':'')+'><td>'+r.mn+' '+year+(r.now?' '+chip('This month','ok'):'')+' <span class="rmore">View →</span></td><td class="r num">'+(r.n||'—')+'</td><td class="r num">'+(r.inv?fmt(r.inv):'—')+'</td><td class="r num">'+(r.adv?fmt(r.adv):'—')+'</td><td style="width:18%">'+(r.adv?bar(r.adv/mx*100,null,true):'')+'</td><td class="r num">'+(r.future?'':r.acc?fmt(r.acc):'—')+'</td><td class="r num">'+(r.got?fmt(r.got):r.future?'':'—')+'</td></tr>').join('')+
+    '<tr class="tot"><td>Total '+year+'</td><td class="r num">'+T('n')+'</td><td class="r num">'+fmt(T('inv'))+'</td><td class="r num">'+fmt(T('adv'))+'</td><td></td><td class="r num">'+fmt(r2(sum(rows.filter(r=>!r.future),r=>r.acc)))+'</td><td class="r num">'+fmt(r2(T('got')))+'</td></tr></tbody></table></div>'+
+    '<p class="small" style="margin:10px 0 0">Amount advanced = money paid out to clients that month. Fee earned (accrued) = '+S.settings.factorFee+'% × amount advanced still out during the month. Fee received = fee (ujrah) actually collected when the debtor pays (from the ledger). Click a month to see its invoices.</p></section>';
+}
+function vFactoring(b,scope){
+  const cos=scopeCos(scope,'factoring');if(!cos.length)return vPicker(b,'factoring');
+  const ids=cos.map(c=>c.id),all=scope==='all',title=all?'All companies':cos[0].name;
+  const invs=S.invoices.filter(i=>ids.includes(i.companyId)),live=invs.filter(i=>i.status==='funded'),mc=monthFig(ymOf(AS_OF),b).cos.filter(x=>ids.includes(x.c.id));
+  const alloc=sum(ids,id=>b.alloc[id]||0),fOut=r2(sum(live,i=>i.advanced)),fee=r2(sum(mc,x=>x.fee));
+  const cofShare=r2(sum(mc,x=>x.dep?x.cof*sum(live.filter(i=>i.companyId===x.c.id),i=>i.advanced)/x.dep:0)),hot=cos.some(c=>b.usage(c.id)>=c.threshold);
+  const col=invs.filter(i=>i.status==='collected'),avg=col.length?Math.round(sum(col,i=>days(i.fundedOn,i.collectedOn))/col.length):0;
+  const cnt=s=>invs.filter(i=>i.status===s).length,dc=debtorConc(ids);
+  const top=dc.slice(0,3),rest=dc.slice(3),tot=sum(dc,d=>d.amt);
+  const rows=top.concat(rest.length?[{debtor:'Others',amt:sum(rest,d=>d.amt),p:tot?sum(rest,d=>d.amt)/tot*100:0,over:false}]:[]);
+  return head('<a href="#factoring">Capbridge-i</a> › '+esc(title),'Capbridge-i · '+esc(title)+' '+chip('Sample data')+' '+tbc,
+      scopeSel('factoring',scope)+'<button class="btn" data-act="newInv" data-ocr="1" data-co="'+(all?'':scope)+'">Upload invoice (OCR)</button><button class="btn pri" data-act="newInv" data-co="'+(all?'':scope)+'">+ New Capbridge-i case</button>',
+      'Draft terms: '+S.settings.factorAdv+'% advance, fee (ujrah) '+S.settings.factorFee+'% per month on amount advanced, debtor pays, balance less fee rebated to client.')+
+    '<div class="kpis">'+kpi('Company fund (all products)',rm(alloc),pct(alloc?sum(ids,id=>b.dep[id]||0)/alloc*100:0)+' used incl. CapBoost',hot?'warn':'')+kpi('Funded outstanding',rm(fOut),pct(alloc?fOut/alloc*100:0)+' of company fund')+
+      kpi('Fee income this month',rm(fee),'Net after COF share '+rm(r2(fee-cofShare)))+kpi('Funded invoices',live.length,col.length?'Avg '+avg+' days to collect':'None collected yet')+'</div>'+concAlertHTML(all?null:ids,title)+fctMonthly(invs,scope)+
+    '<section><h2 style="margin-bottom:10px">Invoice flow</h2><div class="flowsteps">'+[['submitted','Submitted'],['verified','Debtor verified'],['funded','Funded (advance paid)'],['collected','Collected from debtor']].map(([s,l])=>'<div class="step'+(s==='funded'?' hl':'')+'"><b>'+cnt(s)+'</b><span>'+l+'</span></div>').join('')+
+      '<div class="step"><b>'+col.length+'</b><span>Balance / rebate to client</span></div></div></section>'+
+    '<div class="g-wide"><section class="card"><div class="hd"><h2>Invoices</h2><span class="hint">'+invs.length+' invoices</span></div>'+(invs.length?invTable(invs,all):'<p class="small">No invoices yet.</p>')+'</section>'+
+    '<section class="card"><div class="hd"><h2>Debtor concentration</h2></div><p class="hint" style="margin:0 0 12px">Limit per debtor: '+S.settings.debtorLimit+'% of funded book'+(all?'':' (this company)')+' </p><div class="hbars">'+
+      (rows.length?rows.map(d=>'<div><div class="top"><span>'+esc(d.debtor)+(d.over?' '+chip('Over limit','warn'):'')+'</span><span class="num">'+pct(d.p,0)+'</span></div><div class="trk"><i class="'+(d.over?'o':'')+'" style="width:'+d.p.toFixed(1)+'%"></i></div></div>').join(''):'<p class="small">No funded invoices.</p>')+'</div></section></div>';
+}
+function acctData(cu){
+  const items=[];
+  S.cases.filter(k=>k.customerId===cu.id).forEach(k=>{const i=caseInfo(k);
+    items.push({kind:'case',id:k.id,ref:k.ref,product:'CapBoost',co:k.companyId,date:k.start,issued:k.amount,out:i.status==='Settled'?0:i.principalOut,bal:i.balance,
+      next:i.next&&i.status!=='Settled'?i.next.due:null,nextAmt:i.next?owe(i.next):0,overdue:i.overdue,dpd:i.dpd,ongoing:i.status!=='Settled',status:k.settlement?'Settled early':i.status,terms:k.rate+'% / mth · '+k.tenure+' m'})});
+  S.invoices.filter(v=>v.clientId===cu.id&&v.fundedOn).forEach(v=>{const live=v.status==='funded',od=live&&v.debtorDue<AS_OF;
+    items.push({kind:'inv',id:v.id,ref:v.no,product:'Capbridge-i',co:v.companyId,date:v.fundedOn,issued:v.advanced,out:live?v.advanced:0,bal:live?v.advanced:0,
+      next:live?v.debtorDue:null,nextAmt:live?v.amount:0,overdue:od?v.advanced:0,dpd:od?days(v.debtorDue,AS_OF):0,ongoing:live,status:live?(od?'Overdue':'Funded'):'Collected',terms:v.advPct+'% advance · debtor '+v.debtor})});
+  items.sort((a,b)=>(b.ongoing-a.ongoing)||(a.date<b.date?1:-1));
+  const on=items.filter(x=>x.ongoing);
+  return{cu,items,on,issued:r2(sum(items,x=>x.issued)),issuedOn:r2(sum(on,x=>x.issued)),out:r2(sum(on,x=>x.out)),bal:r2(sum(on,x=>x.bal)),overdue:r2(sum(items,x=>x.overdue)),
+    dpd:Math.max(0,...items.map(x=>x.dpd)),cos:[...new Set(items.map(x=>x.co))]};
+}
+function acctAll(){return S.customers.map(acctData).filter(a=>a.items.length)}
+function acctListHTML(){
+  let list=acctAll();
+  if(ui.aShow==='ongoing')list=list.filter(a=>a.on.length);
+  const q=norm(ui.aq),qd=digits(ui.aq);
+  if(q)list=list.filter(a=>norm(a.cu.name).includes(q)||norm(a.cu.director).includes(q)||(qd.length>=3&&(digits(a.cu.ssm).includes(qd)||digits(a.cu.ic).includes(qd)))||a.items.some(x=>norm(x.ref).includes(q)));
+  const srt={issued:(a,b)=>b.issued-a.issued,out:(a,b)=>b.out-a.out,overdue:(a,b)=>b.overdue-a.overdue||b.out-a.out,name:(a,b)=>a.cu.name.localeCompare(b.cu.name)}[ui.aSort];
+  list.sort(srt);
+  if(!list.length)return '<p class="small">No clients match.</p>';
+  const coChip=id=>chip(esc(((coById(id)||{}).name||id)),'mute');
+  return list.map(a=>{const show=ui.aShow==='ongoing'?a.on:a.items,open=ui.aOpen[a.cu.id];
+    const byCo=a.cos.length>1?a.cos.map(id=>{const xs=show.filter(x=>x.co===id);return xs.length?'<tr class="tot"><td colspan="4">'+esc(coById(id).name)+' subtotal</td><td class="r num">'+fmt(r2(sum(xs,x=>x.issued)))+'</td><td class="r num">'+fmt(r2(sum(xs,x=>x.out)))+'</td><td class="r num">'+fmt(r2(sum(xs,x=>x.bal)))+'</td><td colspan="3"></td></tr>':''}).join(''):'';
+    return '<details class="acct" data-cu="'+a.cu.id+'"'+(open?' open':'')+'><summary>'+
+      '<div style="min-width:0"><b style="font-size:15px">'+esc(a.cu.name)+'</b> '+(a.overdue>0?chip('Overdue '+a.dpd+'d',a.dpd>=60?'bad':'warn'):'')+'<div class="small">SSM '+esc(a.cu.ssm)+' · '+a.on.length+' ongoing / '+a.items.length+' total · '+a.cos.map(id=>esc(coById(id).name)).join(', ')+'</div></div>'+
+      '<div class="fig"><span>Total issued (all time)</span><b class="num">'+fmt(a.issued)+'</b></div>'+
+      '<div class="fig"><span>Outstanding (principal)</span><b class="num">'+fmt(a.out)+'</b></div>'+
+      '<div class="fig hide-sm"><span>Overdue</span><b class="num" style="color:'+(a.overdue>0?'var(--orange-ink)':'inherit')+'">'+(a.overdue>0?fmt(a.overdue):'—')+'</b></div>'+
+      '<svg class="chev" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>'+
+      '<div class="body"><div class="tw"><table><thead><tr><th>Case</th><th>Product</th><th>Company</th><th>Issued on</th><th class="r">Amount issued</th><th class="r">Outstanding</th><th class="r">Balance incl. profit</th><th>Next due</th><th>Status</th><th></th></tr></thead><tbody>'+
+      (show.length?show.map(x=>'<tr><td><b>'+x.ref+'</b><div class="small">'+esc(x.terms)+'</div></td><td>'+x.product+'</td><td>'+coChip(x.co)+'</td><td>'+fd(x.date)+'</td><td class="r num">'+fmt(x.issued)+'</td><td class="r num">'+(x.out?fmt(x.out):'—')+'</td><td class="r num">'+(x.bal?fmt(x.bal):'—')+'</td><td>'+(x.next?fds(x.next)+' · '+fmt(x.nextAmt):'—')+'</td><td>'+
+        (x.overdue>0?chip('Overdue '+x.dpd+'d','warn'):chip(x.status,x.ongoing?'ok':'mute'))+'</td><td>'+(x.kind==='case'?'<a href="#customer-'+a.cu.id+'" data-act="tab" data-cu="'+a.cu.id+'" data-k="'+x.id+'" data-nav="1">Open</a>':'<a href="#customer-'+a.cu.id+'">Open</a>')+'</td></tr>').join(''):'<tr><td colspan="10" class="small">No ongoing loans. Switch to “All loans” to see history.</td></tr>')+
+      byCo+'<tr class="tot"><td colspan="4">Total · '+show.length+(ui.aShow==='ongoing'?' ongoing':'')+' case'+(show.length===1?'':'s')+(ui.aShow==='ongoing'&&a.items.length>a.on.length?' <span class="small" style="font-weight:400">('+(a.items.length-a.on.length)+' settled hidden)</span>':'')+'</td><td class="r num">'+fmt(r2(sum(show,x=>x.issued)))+'</td><td class="r num">'+fmt(r2(sum(show,x=>x.out)))+'</td><td class="r num">'+fmt(r2(sum(show,x=>x.bal)))+'</td><td colspan="3"></td></tr>'+
+      '</tbody></table></div></div></details>'}).join('');
+}
+function vAccounts(b){
+  const all=acctAll(),on=all.filter(a=>a.on.length);
+  const issued=r2(sum(all,a=>a.issued)),out=r2(sum(all,a=>a.out)),od=all.filter(a=>a.overdue>0);
+  return head('Module 5 · Customers','Specific Account '+chip('Sample data'),'<button class="btn" data-act="acctAll" data-open="1">Expand all</button><button class="btn" data-act="acctAll" data-open="0">Collapse all</button>',
+      'Every client with all their loans across companies and products — CapBoost cases and Capbridge-i invoices.')+
+    '<div class="kpis">'+kpi('Clients with ongoing loans',on.length,all.length+' clients have borrowed in total')+kpi('Total issued (all time)',rm(issued),sum(all,a=>a.items.length)+' cases · all companies')+
+      kpi('Outstanding now',rm(out),sum(all,a=>a.on.length)+' ongoing cases · principal still out','hl')+kpi('Overdue',rm(r2(sum(od,a=>a.overdue))),od.length+' client'+(od.length===1?'':'s'),od.length?'warn':'')+'</div>'+
+    '<section class="card"><div class="toolbar"><label for="aq" style="position:absolute;left:-9999px">Search clients</label><input id="aq" class="in grow" placeholder="Search client, SSM, IC, director or case no." value="'+esc(ui.aq)+'" data-ui="aq" autocomplete="off">'+
+      '<label for="ash" style="position:absolute;left:-9999px">Show</label><select id="ash" class="in" data-ui="aShow">'+opt('ongoing','Ongoing loans only',ui.aShow==='ongoing')+opt('all','All loans (incl. settled)',ui.aShow==='all')+'</select>'+
+      '<label for="aso" style="position:absolute;left:-9999px">Sort</label><select id="aso" class="in" data-ui="aSort">'+[['issued','Sort: total issued'],['out','Sort: outstanding'],['overdue','Sort: overdue first'],['name','Sort: name A–Z']].map(([v,l])=>opt(v,l,ui.aSort===v)).join('')+'</select></div>'+
+      '<div id="acct_list" style="display:grid;gap:8px">'+acctListHTML()+'</div>'+
+      '<p class="small" style="margin:10px 0 0">Total issued = all loans and invoice advances ever given to the client, from every company. Outstanding = principal / advance still out on ongoing cases.</p></section>';
+}
+function vLedger(){
+  const types=['all',...Object.keys(TYPE)];
+  const list=S.ledger.filter(l=>ui.lt==='all'||l.type===ui.lt).sort((a,b)=>b.date<a.date?-1:b.date>a.date?1:b.id-a.id);
+  return head('Records','Ledger','<label for="lt" class="small">Type</label><select id="lt" class="in" data-ui="lt">'+types.map(t=>opt(t,t==='all'?'All movements':TYPE[t],ui.lt===t)).join('')+'</select>','Every money movement is one row. All dashboard numbers are sums over these rows.')+
+    '<section class="card"><div class="hd"><h2>'+list.length+' rows</h2><span class="hint">Total '+rm(r2(sum(list,l=>l.amount)))+'</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Type</th><th>From</th><th>To</th><th class="r">Amount</th><th>Ref</th><th>Note</th></tr></thead><tbody>'+
+    list.slice(0,400).map(l=>'<tr><td>'+fd(l.date)+'</td><td>'+TYPE[l.type]+'</td><td>'+esc(entLabel(l.from))+'</td><td>'+esc(entLabel(l.to))+'</td><td class="r num">'+fmt(l.amount)+'</td><td class="small">'+esc(l.ref)+'</td><td class="small">'+esc(l.note)+'</td></tr>').join('')+'</tbody></table></div>'+(list.length>400?'<p class="small">Showing latest 400</p>':'')+'</section>';
+}
+function vSettings(){
+  const s=S.settings;
+  return head('Records','Settings','','Rules the alerts and dashboards use. Changes apply immediately (saved in this browser only).')+
+    '<form class="card" id="setf"><div class="hd"><h2>Company setup</h2><button type="button" class="btn sm" data-act="addCo">+ Add company</button></div>'+
+    '<p class="hint" style="margin:0 0 12px">Switch on the products each company offers. A company with no products (expenses or parking only) can still get pool allocation, but won’t appear in customer or product pickers.</p>'+
+    '<div class="tw"><table><thead><tr><th>Company</th><th>CapBoost</th><th>Capbridge-i</th><th>Purpose (if no products)</th><th>Default COF % (new funds)</th><th>Usage alert %</th></tr></thead><tbody>'+
+    S.companies.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td>'+
+      ['capboost','factoring'].map(p=>'<td><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="'+p+'_'+c.id+'" id="'+p+'_'+c.id+'"'+(offers(c,p)?' checked':'')+'> On</label></td>').join('')+
+      '<td><input class="in" style="width:200px" name="pu_'+c.id+'" id="pu_'+c.id+'" value="'+esc(c.purpose||'')+'" placeholder="e.g. Expenses / parking only" aria-label="'+esc(c.name)+' purpose"></td>'+
+      '<td><input class="in" style="width:90px" type="number" step="0.01" name="cof_'+c.id+'" id="cof_'+c.id+'" value="'+c.cofRate+'" aria-label="'+esc(c.name)+' COF %"></td><td><input class="in" style="width:90px" type="number" step="1" name="th_'+c.id+'" id="th_'+c.id+'" value="'+c.threshold+'" aria-label="'+esc(c.name)+' alert threshold"></td></tr>').join('')+'</tbody></table></div>'+
+    '<div class="divider"></div><div class="form-grid">'+
+    field('cofBase','Charge company COF on '+tbc,'<select class="in" id="cofBase" name="cofBase">'+opt('allocated','Allocated amount (recommended — idle allocation isn’t free)',s.cofBase==='allocated')+opt('deployed','Deployed amount (loans out only)',s.cofBase==='deployed')+'</select>')+
+    field('maturityMonths','Principal maturity alert (months ahead)',inp('maturityMonths',s.maturityMonths,'number','min="1" max="24"'))+
+    field('debtorLimit','Capbridge-i debtor limit (% of funded book)',inp('debtorLimit',s.debtorLimit,'number','min="1" max="100"'))+
+    field('factorFee','Capbridge-i fee (ujrah) % per month '+tbc,inp('factorFee',s.factorFee,'number','step="0.01"'))+
+    field('factorAdv','Capbridge-i advance % '+tbc,inp('factorAdv',s.factorAdv,'number','min="1" max="100"'))+
+    '</div><div class="err" id="seterr" style="margin-top:12px"></div><div class="acts" style="margin-top:16px"><button class="btn pri" type="submit">Save settings</button></div></form>'+
+    '<section class="card"><div class="hd"><h2>Open questions (spec §7)</h2></div><ol class="qlist">'+
+    ['CapBoost pricing (flat monthly rate or fixed fee?), tenure range, fixed monthly vs revenue-based repayment.','Capbridge-i: advance %, fee basis (per month or per invoice), who repays (client or debtor), rebate formula.','Companies: Domax Credit offers CapBoost + Capbridge-i; Sugoto and Maxus are expenses / parking. Any other companies?','Customer records shared across companies (prototype assumes yes, one record per SSM).','Staff access: restrict by company?','Investor payout frequency: monthly only, or quarterly/yearly? Early withdrawal and penalty?','Hosting: decided — Next.js + Postgres on Google Cloud (Cloud Run + Cloud SQL).'].map(q=>'<li>'+q+'</li>').join('')+'</ol></section>';
+}
+
+/* ===== Render ===== */
+function render(){
+  const b=balances(),r=route();renderNav(b);
+  let h;
+  if(r==='pool')h=vPool(b);else if(r==='dashboard')h=vDashboard(b);else if(r==='companies')h=vCompanies(b);
+  else if(r.startsWith('customers-'))h=vCustomers(b,r.slice(10));else if(r.startsWith('customer-'))h=vCustomer(b,r.slice(9));
+  else if(r==='new')h=vNew();else if(r==='capboost'||r==='factoring')h=vPicker(b,r);else if(r.startsWith('capboost-'))h=vCapBoost(b,r.slice(9));else if(r.startsWith('factoring-'))h=vFactoring(b,r.slice(10));
+  else if(r==='accounts')h=vAccounts(b);else if(r==='ledger')h=vLedger();else if(r==='settings')h=vSettings();else h=vPool(b);
+  document.getElementById('app').innerHTML=h;
+  const sf=document.getElementById('setf');if(sf)sf.addEventListener('submit',saveSettings);
+}
+window.addEventListener('hashchange',()=>{closeModal();render();window.scrollTo(0,0)});
+
+const spOpts=sel=>S.companies.map(c=>opt(c.id,c.name+' · '+coDesc(c),c.id===sel)).join('')+'<option value="__new">+ Add company…</option>';
+const spRow=(n,coId,amt)=>{const c=coById(coId)||{};return '<tr data-n="'+n+'"><td style="min-width:170px"><select class="in" style="width:100%" id="sc_'+n+'" name="sc_'+n+'" data-sp="co" data-prev="'+coId+'" aria-label="Company">'+spOpts(coId)+'</select></td>'+
+  '<td><input class="in" style="width:120px" type="number" min="0" id="sa_'+n+'" name="sa_'+n+'" value="'+amt+'" aria-label="Amount (RM)"></td>'+
+  '<td><input class="in" style="width:76px" type="number" step="0.01" id="sr_'+n+'" name="sr_'+n+'" value="'+(c.cofRate!=null?c.cofRate:0)+'" aria-label="COF % the company bears"></td>'+
+  '<td><button type="button" class="btn sm" data-act="spDelRow" data-n="'+n+'" aria-label="Remove this row">×</button></td></tr>'};
+const spRead=fm=>[...fm.querySelectorAll('#sp_body tr')].map(tr=>{const n=tr.dataset.n;return{n,co:fm['sc_'+n].value,a:num(fm['sa_'+n].value),r:num(fm['sr_'+n].value)}});
+/* ===== Money actions ===== */
+function applyPayment(k,amount,date,ref,source){
+  let rem=r2(amount),pTot=0,fTot=0;const touched=[];
+  for(const r of k.rows){if(rem<=0.004)break;if(owe(r)<=0.004)continue;
+    const f=Math.min(rem,r2(r.profit-(r.recF||0)));r.recF=r2((r.recF||0)+f);rem=r2(rem-f);fTot+=f;
+    const p=Math.min(rem,r2(r.principal-(r.recP||0)));r.recP=r2((r.recP||0)+p);rem=r2(rem-p);pTot+=p;
+    r.date=date;touched.push(r.n);}
+  const c='co:'+k.companyId;
+  if(fTot>0)L(date,'repayment_profit','case:'+k.id,c,fTot,ref,k.ref+' #'+touched.join(',')+' profit');
+  if(pTot>0)L(date,'repayment_principal','case:'+k.id,c,pTot,ref,k.ref+' #'+touched.join(',')+' principal');
+  S.payments.push({id:'p'+S.seq++,caseId:k.id,rows:touched,amount:r2(amount-rem),date,ref,source,confirmedBy:'Chloe'});
+  return{touched,excess:rem};
+}
+function settleCalc(k,date){const ym=ymOf(date),un=k.rows.filter(r=>owe(r)>0.004);
+  const cur=k.rows.find(r=>ymOf(r.due)===ym);
+  return{ym,cur,pOut:r2(sum(k.rows,r=>r.principal-(r.recP||0))),
+    overdueF:r2(sum(un.filter(r=>ymOf(r.due)<ym),r=>r.profit-(r.recF||0))),
+    monthF:cur?r2(Math.max(0,cur.profit-(cur.recF||0))):r2(k.amount*k.rate/100),
+    futureF:r2(sum(un.filter(r=>ymOf(r.due)>ym),r=>r.profit-(r.recF||0)))}}
+const stItems=fm=>[...fm.querySelectorAll('#st_items > [data-n]')].map(el=>{const n=el.dataset.n;return{label:fm['it_l_'+n].value.trim(),sign:+fm['it_s_'+n].value,amt:r2(num(fm['it_a_'+n].value))}}).filter(i=>i.amt>0||i.label);
+function applySettlement(k,date,ref,o){
+  const c=settleCalc(k,date),cc='co:'+k.companyId;
+  const pCol=r2(Math.min(o.principal,c.pOut)),writeoff=r2(c.pOut-pCol);
+  let left=r2(Math.max(0,o.profit-o.deduct)),waived=0;
+  for(const r of k.rows){if(owe(r)<=0.004)continue;
+    r.recP=r.principal;const fr=r2(r.profit-(r.recF||0)),t=Math.min(left,fr);
+    r.recF=r2((r.recF||0)+t);left=r2(left-t);r.waived=r2(r.profit-r.recF);waived+=r.waived;r.date=date}
+  const profitCol=r2(Math.max(0,o.profit-o.deduct)-left),charges=r2(o.charges+left);
+  if(profitCol>0)L(date,'repayment_profit','case:'+k.id,cc,profitCol,ref,k.ref+' early settlement · profit');
+  if(pCol>0)L(date,'repayment_principal','case:'+k.id,cc,pCol,ref,k.ref+' early settlement · principal');
+  if(writeoff>0)L(date,'principal_writeoff','case:'+k.id,cc,writeoff,ref,k.ref+' principal written off at settlement');
+  if(charges>0)L(date,'other_charge','case:'+k.id,cc,charges,ref,k.ref+' settlement charges: '+o.items.filter(i=>i.sign>0).map(i=>i.label).join(', '));
+  const total=r2(pCol+profitCol+charges);
+  S.payments.push({id:'p'+S.seq++,caseId:k.id,rows:[],amount:total,date,ref,source:'Early settlement',confirmedBy:'Chloe'});
+  k.settlement={date,ref,principal:pCol,writeoff,profit:profitCol,charges,deduct:o.deduct,items:o.items,waived:r2(waived),total};return k.settlement}
+function setRow(k,r,amount,date){
+  const nf=Math.min(amount,r.profit),np=r2(amount-nf);
+  const dF=r2(nf-(r.recF||0)),dP=r2(np-(r.recP||0)),c='co:'+k.companyId;
+  if(dF)L(date||AS_OF,'repayment_profit','case:'+k.id,c,dF,'EDIT',k.ref+' #'+r.n+' profit (manual edit)');
+  if(dP)L(date||AS_OF,'repayment_principal','case:'+k.id,c,dP,'EDIT',k.ref+' #'+r.n+' principal (manual edit)');
+  r.recF=nf;r.recP=np;r.date=amount>0?date:'';
+}
+function nextRef(co){const c=coById(co);const n=Math.max(0,...S.cases.filter(k=>k.companyId===co).map(k=>parseInt(k.ref.split('-')[1],10)))+1;return c.prefix+'-'+String(n).padStart(4,'0')}
+function newCaseModal(pre){
+  const b=balances(),loans=S.companies.filter(c=>offers(c,'capboost'));
+  if(!loans.length){toast('No company offers CapBoost — switch it on in Settings');return}
+  const co=loans.some(c=>c.id===pre.co)?pre.co:loans[0].id;
+  openModal('New CapBoost case',
+    field('m_cu','Customer','<select class="in" id="m_cu" name="cu">'+S.customers.slice().sort((a,c)=>a.name.localeCompare(c.name)).map(c=>opt(c.id,c.name,c.id===pre.cu)).join('')+'</select>')+
+    '<div class="form-grid">'+field('m_co','Company (funded from)','<select class="in" id="m_co" name="co">'+loans.map(c=>opt(c.id,c.name+' · avail '+shortN(b.avail(c.id)),c.id===co)).join('')+'</select>')+
+    field('m_amt','Loan amount (RM)',inp('m_amt',pre.amount||100000,'number','name="amt" min="1000" step="1000"').replace('name="m_amt"',''))+
+    field('m_rate','Monthly profit rate (flat %)',inp('m_rate',1.5,'number','step="0.01" min="0"'))+
+    field('m_ten','Tenure (months)',inp('m_ten',pre.tenure||12,'number','min="1" max="60"'))+
+    field('m_start','Start / disbursement date',inp('m_start',AS_OF,'date'))+
+    field('m_day','Repayment day (1–31, 31 = last day)',inp('m_day',D(AS_OF).d,'number','min="1" max="31"'))+'</div><div class="prev" id="m_prev"></div>',
+    d=>{const amt=num(d.amt),rate=num(d.m_rate),ten=Math.round(num(d.m_ten)),day=Math.round(num(d.m_day)),b2=balances();
+      if(amt<=0||ten<1||day<1||day>31||!d.m_start)return 'Fill in amount, tenure, start date and repayment day.';
+      if(amt>b2.avail(d.co))return coById(d.co).name+' has only '+rm(b2.avail(d.co))+' available. Allocate more from the pool first (Pool & Allocation → Allocate to company).';
+      const ref=nextRef(d.co);const k={id:ref,ref,product:'capboost',customerId:d.cu,companyId:d.co,amount:amt,rate,tenure:ten,start:d.m_start,day,purpose:pre.purpose||'',rows:genRows(amt,rate,ten,d.m_start,day)};
+      S.cases.push(k);L(d.m_start,'disbursement','co:'+d.co,'case:'+ref,amt,ref,'Disburse to customer');
+      ui.tab[d.cu]=ref;toast(ref+' created · '+rm(amt)+' disbursed from '+coById(d.co).name);
+      if(route()!=='customer-'+d.cu){location.hash='customer-'+d.cu}},
+    'Create case &amp; disburse',
+    f=>{const amt=num(f.amt.value),rate=num(f.m_rate.value),ten=Math.max(1,Math.round(num(f.m_ten.value))),co=f.co.value;
+      const prof=r2(amt*rate/100),p=Math.round(amt/ten),av=balances().avail(co);
+      document.getElementById('m_prev').innerHTML='<div><span>Monthly profit</span><b class="num">'+rm(prof)+'</b></div><div><span>Instalment</span><b class="num">'+rm(p+prof)+'</b></div><div><span>Total repayable</span><b class="num">'+rm(r2(amt+prof*ten))+'</b></div><div><span>'+esc(coById(co).name)+' available after</span><b class="num" style="color:'+(av-amt<0?'var(--bad)':'inherit')+'">'+rm(r2(av-amt))+'</b></div>';});
+}
+function newInvModal(fromOcr,pre){
+  pre=pre||{};const fcos=S.companies.filter(c=>offers(c,'factoring'));
+  if(!fcos.length){toast('No company offers Capbridge-i — switch it on in Settings');return}
+  const clients=S.customers.slice().sort((a,c)=>a.name.localeCompare(c.name)),bb=balances();
+  openModal(fromOcr?'Upload invoice (OCR)':'New Capbridge-i case',
+    (fromOcr?'<label class="drop" for="iv_file">'+ICON.up+'<span>Choose invoice image or PDF</span><input id="iv_file" name="iv_file" type="file" accept="image/*,application/pdf"></label><p class="note" id="iv_note">Prototype: OCR is simulated. Choosing a file fills sample values for you to check.</p>':'')+
+    '<div class="form-grid">'+field('iv_co','Company (funds the advance)','<select class="in" id="iv_co" name="co">'+fcos.map(c=>opt(c.id,c.name+' · avail '+shortN(bb.avail(c.id)),c.id===pre.co)).join('')+'</select>')+
+    field('iv_cl','Client','<select class="in" id="iv_cl" name="cl">'+clients.map(c=>opt(c.id,c.name,c.id===pre.cl)).join('')+'</select>')+'</div>'+
+    '<div class="form-grid">'+field('iv_debtor','Debtor',inp('iv_debtor','','text','required'))+field('iv_no','Invoice no.',inp('iv_no','INV-'+(2306+S.invoices.length)))+
+    field('iv_amt','Invoice amount (RM)',inp('iv_amt','','number','min="1"'))+field('iv_adv','Advance %',inp('iv_adv',S.settings.factorAdv,'number','min="1" max="100"'))+
+    field('iv_due','Debtor due date',inp('iv_due',addD(AS_OF,60),'date'))+'</div>',
+    d=>{const amt=num(d.iv_amt),adv=num(d.iv_adv);if(!d.iv_debtor.trim()||amt<=0)return 'Enter the debtor and invoice amount.';
+      if(S.invoices.some(i=>i.no.toUpperCase()===d.iv_no.trim().toUpperCase()))return 'Invoice '+d.iv_no+' already exists — possible duplicate.';
+      S.invoices.push({id:d.iv_no.trim(),no:d.iv_no.trim(),companyId:d.co,clientId:d.cl,debtor:d.iv_debtor.trim(),amount:amt,advPct:adv,advanced:r2(amt*adv/100),status:'submitted',fundedOn:null,debtorDue:d.iv_due,collectedOn:null,fee:0,rebate:0});
+      toast(d.iv_no+' submitted · next: verify debtor');},'Submit invoice',
+    fromOcr?f=>{const fl=f.iv_file.files[0];if(fl&&!f.dataset.filled){f.dataset.filled='1';f.iv_cl.value='c21';f.iv_debtor.value='Sinar Telco Bhd';f.iv_amt.value=140000;f.iv_due.value=addD(AS_OF,60);
+      document.getElementById('iv_note').textContent=fl.name+' read · suggested values filled (client 88%, debtor 93%, amount 97%, due date 81% — check)';}}:null);
+}
+function saveSettings(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));
+  for(const c of S.companies){for(const p of ['capboost','factoring']){
+    if(offers(c,p)&&!d[p+'_'+c.id]){const busy=p==='capboost'?S.cases.some(k=>k.companyId===c.id&&caseInfo(k).status!=='Settled'):S.invoices.some(i=>i.companyId===c.id&&i.status!=='collected');
+      if(busy){document.getElementById('seterr').textContent=c.name+' still has open '+PRODUCTS[p]+' business. Settle or move it before switching '+PRODUCTS[p]+' off.';return}}}}
+  S.companies.forEach(c=>{c.products=['capboost','factoring'].filter(p=>d[p+'_'+c.id]);c.purpose=(d['pu_'+c.id]||'').trim();c.cofRate=num(d['cof_'+c.id]);c.threshold=num(d['th_'+c.id])});
+  Object.assign(S.settings,{cofBase:d.cofBase,maturityMonths:Math.max(1,num(d.maturityMonths)),debtorLimit:num(d.debtorLimit),factorFee:num(d.factorFee),factorAdv:num(d.factorAdv)});
+  save();render();toast('Settings saved');}
+
+/* ===== New customer: paste parser ===== */
+const SAMPLE_PASTE='Hi Chloe, new lead from Puchong:\nCompany: Teguh Jaya Hardware Sdn Bhd\nSSM: 202101099887\nDirector: Lim Wei Ken\nIC: 820415-10-5531\nHP: 012-000 4471\nEmail: accounts@teguhjaya.example\nAddress: No 12, Jalan Industri 3, Puchong, Selangor\nBusiness: hardware & building materials wholesale\nNeed 200k working capital, 12 months';
+const SAMPLE_FORM_FILE='Application form - Cemerlang Bina.pdf';
+const SAMPLE_FORM='CAPBOOST FINANCING APPLICATION\n— Part 1: Facility —\nFacility applied: CapBoost\nFinancier: Domax Credit\nAmount applied: RM 250,000\nTenure: 18 months\nPurpose: Working capital – purchase of stock\n— Part 2: Company —\nCompany name: Cemerlang Bina Supplies Sdn Bhd\nSSM no.: 201901034567\nNature of business: Building materials supply\nAddress: Lot 8, Jalan Perusahaan 2, Bukit Beruntung, Rawang, Selangor\n— Part 3: Director —\nDirector: Nor Azlina binti Kamal\nIC no.: 790322-14-5288\nH/P: 019-000 3812\nEmail: finance@cemerlangbina.example\nSigned: Nor Azlina · 27 Oct 2026';
+function readForm(file){const{F,C}=parsePaste(SAMPLE_FORM);Object.keys(C).forEach(k=>C[k]=k==='address'?86:Math.max(C[k],94));
+  ui.nc={text:SAMPLE_FORM,F:{...F,owner:'Chloe'},C,detected:true,file:'',form:{file:file||SAMPLE_FORM_FILE,pages:3}};render()}
+function parsePaste(t){
+  const F={},C={};
+  const lab=keys=>{const m=t.match(new RegExp('^[\\s*•\\-]*(?:'+keys+')\\s*[:：=\\-]\\s*(.+)$','im'));return m?m[1].trim():''};
+  let v,m;
+  if(v=lab('company name|company|syarikat|nama syarikat|business name')){F.name=v;C.name=99}
+  else if(m=t.match(/([A-Z][\w&.'\- ]{2,60}?\s(?:Sdn\.?\s?Bhd\.?|Berhad|Bhd|Enterprise|PLT))/)){F.name=m[1].trim();C.name=80}
+  if(v=lab('ssm no\\.?|ssm|reg(?:istration)? no\\.?|roc|company no\\.?')){F.ssm=v.replace(/\s/g,'');C.ssm=97}
+  else if(m=t.match(/\b((?:19|20)\d{10})\b/)){F.ssm=m[1];C.ssm=75}
+  if(v=lab('ic no\\.?|ic|nric|mykad|no\\.? kp')){F.ic=v;C.ic=98}
+  else if(m=t.match(/\b(\d{6}-\d{2}-\d{4})\b/)){F.ic=m[1];C.ic=90}
+  if(v=lab('h/p|hp|tel|phone|mobile|no\\.? tel|contact no\\.?')){F.phone=v;C.phone=99}
+  else if(m=t.match(/(?:\+?60|0)1\d[\s-]?\d{3,4}[\s-]?\d{4}/)){F.phone=m[0];C.phone=85}
+  if(m=t.match(/[\w.+-]+@[\w-]+\.[\w.]+/)){F.email=m[0];C.email=99}
+  if(v=lab('director|pengarah|contact person|pic|owner')){F.director=v;C.director=96}
+  if(v=lab('address|alamat')){F.address=v;C.address=72}
+  if(v=lab('nature of business|business|industry|perniagaan|sector')){F.industry=v.charAt(0).toUpperCase()+v.slice(1);C.industry=90}
+  if((v=lab('amount applied|amount requested|financing amount|loan amount|amount|jumlah'))&&(m=v.match(/(\d[\d,]*(?:\.\d+)?)\s*(k|mil|million|juta|m)?\b/i))){let a=num(m[1]);const u=(m[2]||'').toLowerCase();if(u==='k')a*=1e3;else if(u)a*=1e6;F.amount=String(a);C.amount=97}
+  else if(m=t.match(/(?:need|perlu|request(?:ed)?|amount|financing|loan|pinjaman)\D{0,20}?(?:rm\s*)?(\d[\d,]*(?:\.\d+)?)\s*(k|mil|million|juta|m)?\b/i)||t.match(/rm\s*(\d[\d,]*(?:\.\d+)?)\s*(k|mil|million|juta|m)?\b/i)){
+    let a=num(m[1]);const u=(m[2]||'').toLowerCase();if(u==='k')a*=1e3;else if(u)a*=1e6;F.amount=String(a);C.amount=94}
+  if(m=t.match(/(\d{1,2})\s*(?:months?|mths?|bulan)\b/i)){F.tenure=m[1];C.tenure=92}
+  else if(m=t.match(/(\d)\s*(?:years?|tahun)\b/i)){F.tenure=String(m[1]*12);C.tenure=85}
+  v=lab('facility applied|type of facility|facility|product|kemudahan');const pv=(v||t).toLowerCase();
+  if(/capbridge|factoring|invoice financing/.test(pv)){F.product='factoring';C.product=v?97:70}else if(/capboost/.test(pv)){F.product='capboost';C.product=v?97:70}
+  v=lab('financier|lender|apply to|applied to|company applied to|pembiaya');
+  if(v){const c=S.companies.find(c=>norm(v).includes(norm(c.name).split(' ')[0])||norm(c.name).includes(norm(v)));if(c){F.company=c.id;C.company=96}}
+  if(v=lab('purpose|tujuan')){F.purpose=v;C.purpose=93}
+  return{F,C};
+}
+function findDup(F){const s=digits(F.ssm),i=digits(F.ic);return S.customers.find(c=>(s.length>=6&&digits(c.ssm)===s)||(i.length>=6&&digits(c.ic)===i))||null}
+
+/* ===== Event wiring ===== */
+const ACT={
+  close:()=>closeModal(),
+  ovclose:(d,el,e)=>{if(e.target===el)closeModal()},
+  reset:()=>{openModal('Reset sample data','<p style="margin:0">This replaces everything you changed in this browser with the original sample data.</p>',()=>{S=seed();ui.ocr=null;ui.nc=null;toast('Sample data restored')},'Reset')},
+  addFund:()=>{const first=(lending()[0]||S.companies[0]).id;
+    openModal('Add investor fund',
+    '<div class="form-grid">'+field('m_inv','Investor','<select class="in" id="m_inv" name="inv">'+S.investors.map(i=>opt(i.id,i.name)).join('')+opt('new','+ New investor…')+'</select>')+
+    field('m_name','New investor name (if new)',inp('m_name','','text','placeholder="Type to add a new investor"'))+field('m_p','Principal (RM)',inp('m_p',1000000,'number','min="1"'))+field('m_r','Investor rate · COF % p.a.',inp('m_r',10,'number','step="0.01"'))+
+    field('m_s','Start date',inp('m_s',AS_OF,'date'))+field('m_t','Tenor (months)',inp('m_t',12,'number','min="1"'))+field('m_d','Payout day (31 = last day)',inp('m_d',25,'number','min="1" max="31"'))+'</div>'+
+    '<h3>Allocate to companies</h3><p class="hint" style="margin:0">Pick a company for each portion. Each portion has its own cost (COF % p.a.) that the company pays back to the pool. Need a new company? Choose “+ Add company…” in the list.</p>'+
+    '<div class="tw"><table><thead><tr><th>Company</th><th>Amount (RM)</th><th>COF % company bears</th><th></th></tr></thead><tbody id="sp_body">'+spRow(0,first,1000000)+'</tbody></table></div>'+
+    '<div><button type="button" class="btn sm" data-act="spAddRow">+ Add another company</button></div>'+
+    '<div id="sp_new" class="prev" hidden><b style="font-size:14px">New company</b><div class="form-grid">'+field('nco_name','Company name',inp('nco_name',''))+field('nco_cof','Default COF % p.a.',inp('nco_cof',3.6,'number','step="0.01"'))+'</div>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="nco_cb"> CapBoost</label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="nco_fa"> Capbridge-i</label>'+
+    '<span class="small">None ticked = expenses / parking</span><span style="margin-left:auto;display:flex;gap:6px"><button type="button" class="btn sm" data-act="spCancelCo">Cancel</button><button type="button" class="btn sm pri" data-act="spAddCo">Add company</button></span></div><div class="err" id="nco_err"></div></div>'+
+    '<div class="prev" id="sp_sum"></div>',
+    (d,fm)=>{let iv=d.inv;if(iv==='new'&&!d.m_name.trim())return 'Enter the new investor’s name.';
+      const p=num(d.m_p);if(p<=0)return 'Enter a principal amount.';
+      const parts=spRead(fm).filter(x=>x.a>0);
+      if(new Set(parts.map(x=>x.co)).size!==parts.length)return 'A company appears twice. Put its amount in one row.';
+      const tot=sum(parts,x=>x.a);if(Math.abs(tot-p)>0.5)return 'Allocated '+rm(tot)+' but principal is '+rm(p)+'. Every ringgit must go to a company.';
+      if(iv==='new'){iv='i'+S.seq++;S.investors.push({id:iv,name:d.m_name.trim()})}
+      const f={id:'f'+S.seq++,investorId:iv,principal:p,rate:num(d.m_r),start:d.m_s,tenor:Math.round(num(d.m_t)),payoutDay:Math.round(num(d.m_d)),status:'active',history:[]};
+      S.funds.push(f);L(d.m_s,'investor_in','inv:'+iv,'pool',p,f.id,'Principal in');
+      parts.forEach(x=>L(d.m_s,'allocation','pool','co:'+x.co,x.a,f.id,'Allocate · '+x.r+'% COF',{rate:x.r}));
+      toast(rm(p)+' in from '+invName(iv)+' · allocated to '+parts.length+' compan'+(parts.length>1?'ies':'y'));},'Add &amp; allocate',
+    (fm,e)=>{const t=e&&e.target;
+      if(t&&t.id==='m_name'&&t.value.trim())fm.m_inv.value='new';
+      if(t&&t.id==='m_inv'&&t.value!=='new')fm.m_name.value='';
+      if(t&&t.dataset&&t.dataset.sp==='co'){
+        if(t.value==='__new'){t.value=t.dataset.prev;fm.dataset.target=t.id;const box=document.getElementById('sp_new');box.hidden=false;document.getElementById('nco_name').focus()}
+        else if(t.value!==t.dataset.prev){t.dataset.prev=t.value;fm['sr_'+t.id.slice(3)].value=coById(t.value).cofRate}}
+      if(t&&t.name&&t.name.startsWith('sa_'))fm.dataset.touched='1';
+      const p=num(fm.m_p.value),rows=spRead(fm);
+      if(!fm.dataset.touched&&rows.length===1)fm['sa_'+rows[0].n].value=p;
+      const parts=spRead(fm),tot=sum(parts,x=>x.a),left=r2(p-tot),cofIn=r2(sum(parts,x=>x.a*x.r/1200)),pay=r2(p*num(fm.m_r.value)/1200);
+      document.getElementById('sp_sum').innerHTML='<div><span>Allocated</span><b class="num">'+rm(tot)+' of '+rm(p)+'</b></div><div><span>'+(left>=0?'Left to allocate':'Over by')+'</span><b class="num" style="color:'+(Math.abs(left)>0.5?'var(--bad)':'var(--good)')+'">'+rm(Math.abs(left))+'</b></div>'+
+        '<div><span>COF in from companies / mth</span><b class="num">'+rm(cofIn)+'</b></div><div><span>Pay investor / mth</span><b class="num">'+rm(pay)+'</b></div><div><span>Spread / mth</span><b class="num" style="color:'+(cofIn<pay?'var(--bad)':'var(--good)')+'">'+(cofIn<pay?'−':'+')+rm(Math.abs(r2(cofIn-pay)))+'</b></div>'})},
+  spAddRow:()=>{const fm=document.getElementById('mf'),used=spRead(fm).map(x=>x.co),c=S.companies.find(x=>!used.includes(x.id))||S.companies[0];
+    const n=1+Math.max(...[...fm.querySelectorAll('#sp_body tr')].map(tr=>+tr.dataset.n));
+    document.getElementById('sp_body').insertAdjacentHTML('beforeend',spRow(n,c.id,0));fm.dataset.touched='1';MODAL.onInput(fm);const a=fm['sa_'+n];a.focus();a.select()},
+  spDelRow:d=>{const fm=document.getElementById('mf'),trs=fm.querySelectorAll('#sp_body tr');if(trs.length<2){toast('At least one company is needed');return}
+    fm.querySelector('#sp_body tr[data-n="'+d.n+'"]').remove();fm.dataset.touched='1';MODAL.onInput(fm)},
+  spCancelCo:()=>{document.getElementById('sp_new').hidden=true;document.getElementById('nco_err').textContent=''},
+  allocate:()=>{const b=balances();openModal('Allocate pool cash','<p class="hint" style="margin:0">Unallocated in pool: <b class="num">'+rm(b.idle)+'</b></p>'+
+    '<div class="form-grid">'+field('m_co','Company','<select class="in" id="m_co" name="co">'+S.companies.map(c=>opt(c.id,c.name)).join('')+'</select>')+field('m_a','Amount (RM)',inp('m_a',Math.max(0,b.idle),'number','min="1"'))+
+    field('m_cr','Company bears COF % p.a.',inp('m_cr',(S.companies[0]||{}).cofRate||0,'number','step="0.01"'))+'</div>',
+    d=>{const a=num(d.m_a),b2=balances();if(a<=0)return 'Enter an amount.';if(a>b2.idle+0.004)return 'Only '+rm(b2.idle)+' is unallocated.';
+      L(AS_OF,'allocation','pool','co:'+d.co,a,'','Allocate · '+num(d.m_cr)+'% COF',{rate:num(d.m_cr)});toast(rm(a)+' allocated to '+coById(d.co).name)},'Allocate')},
+  spAddCo:()=>{const g=id=>document.getElementById(id),fm=g('mf'),nm=g('nco_name').value.trim(),err=g('nco_err');
+    if(!nm){err.textContent='Enter the company name.';return}
+    if(S.companies.some(c=>c.name.toLowerCase()===nm.toLowerCase())){err.textContent=nm+' already exists — pick it from the list.';return}
+    const products=[g('nco_cb').checked?'capboost':null,g('nco_fa').checked?'factoring':null].filter(Boolean);
+    const sc=nm.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase();
+    const c={id:'co'+S.seq++,name:nm,short:sc,products,purpose:products.length?'':'Expenses / parking',cofRate:num(g('nco_cof').value),threshold:80,prefix:sc};
+    S.companies.push(c);save();
+    fm.querySelectorAll('select[data-sp="co"]').forEach(sel=>{const v=sel.value;sel.innerHTML=spOpts(v)});
+    const tgt=g(fm.dataset.target||'sc_0');if(tgt){tgt.value=c.id;tgt.dataset.prev=c.id;fm['sr_'+tgt.id.slice(3)].value=c.cofRate}
+    g('nco_name').value='';g('nco_cb').checked=false;g('nco_fa').checked=false;err.textContent='';g('sp_new').hidden=true;
+    MODAL.onInput(fm);renderNav(balances());toast(nm+' added and selected')},
+  moveCo:()=>{const b=balances();if(S.companies.length<2){toast('Only one company — add another in Settings first');return}
+    openModal('Move between companies','<p class="hint" style="margin:0">Only undeployed (available) money can move. Posted as recall + allocation in the ledger.</p>'+
+    '<div class="form-grid">'+field('m_from','From','<select class="in" id="m_from" name="from">'+S.companies.map(c=>opt(c.id,c.name+' · avail '+shortN(b.avail(c.id)))).join('')+'</select>')+
+    field('m_to','To','<select class="in" id="m_to" name="to">'+S.companies.map((c,i)=>opt(c.id,c.name,i===1)).join('')+'</select>')+field('m_a','Amount (RM)',inp('m_a','','number','min="1"'))+
+    field('m_cr','Receiving company bears COF % p.a.',inp('m_cr',(S.companies[1]||{}).cofRate||0,'number','step="0.01"'))+'</div>',
+    d=>{const a=num(d.m_a),av=balances().avail(d.from);if(d.from===d.to)return 'Pick two different companies.';if(a<=0)return 'Enter an amount.';if(a>av+0.004)return coById(d.from).name+' has only '+rm(av)+' undeployed.';
+      L(AS_OF,'recall','co:'+d.from,'pool',a,'','Move · out');L(AS_OF,'allocation','pool','co:'+d.to,a,'','Move · in · '+num(d.m_cr)+'% COF',{rate:num(d.m_cr)});toast(rm(a)+' moved '+coById(d.from).name+' → '+coById(d.to).name)},'Move')},
+  payProfit:d=>{const f=S.funds.find(x=>x.id===d.f),r=fundRateIn(f,d.ym);L(payoutDate(f,d.ym),'investor_profit_payout','pool','inv:'+f.investorId,f.principal*r/1200,f.id+':'+d.ym,'Profit '+ymLabel(d.ym));save();render();toast('Payout to '+invName(f.investorId)+' recorded')},
+  postCof:d=>{const b=balances(),m=monthFig(d.ym,b),[y,mm]=d.ym.split('-').map(Number),me=iso(y,mm,dim(y,mm));let n=0;
+    m.cos.forEach(c=>{if(!c.posted&&c.cof>0){L(me,'cof_transfer','co:'+c.c.id,'pool',c.cof,c.c.id+':'+d.ym,'COF '+ymLabel(d.ym));n++}});
+    S.buckets.forEach(k=>{if(!S.ledger.some(l=>l.type==='parking_yield'&&l.ref===k.id+':'+d.ym)&&(b.park[k.id]||0)>0)L(me,'parking_yield','park:'+k.id,'pool',(b.park[k.id])*k.yield/1200,k.id+':'+d.ym,'Yield '+ymLabel(d.ym))});
+    save();render();toast(n+' COF transfer'+(n===1?'':'s')+' posted for '+ymLabel(d.ym))},
+  rollover:d=>{const f=S.funds.find(x=>x.id===d.f);openModal('Roll over · '+esc(invName(f.investorId)),'<p class="hint" style="margin:0">Same investor record. New term starts at current maturity ('+fd(maturity(f))+'). Principal stays in the pool.</p><div class="form-grid">'+
+    field('m_t','New tenor (months)',inp('m_t',f.tenor,'number','min="1"'))+field('m_r','New COF % p.a.',inp('m_r',f.rate,'number','step="0.01"'))+'</div>',
+    x=>{const t=Math.round(num(x.m_t));if(t<1)return 'Enter a tenor.';f.history=f.history||[];f.history.push({start:f.start,tenor:f.tenor,rate:f.rate});f.start=maturity(f);f.tenor=t;f.rate=num(x.m_r);toast('Rolled over · new maturity '+fd(maturity(f)))},'Roll over')},
+  repayPrincipal:d=>{const f=S.funds.find(x=>x.id===d.f),b=balances();let need=f.principal-Math.max(0,b.idle);const pre={};
+    S.companies.slice().sort((x,y)=>b.avail(y.id)-b.avail(x.id)).forEach(c=>{const t=Math.max(0,Math.min(need,b.avail(c.id)));pre[c.id]=r2(t);need-=t});
+    openModal('Repay principal · '+esc(invName(f.investorId)),'<div class="prev"><div><span>Principal due '+fd(maturity(f))+'</span><b class="num">'+rm(f.principal)+'</b></div>'+(b.idle>0.5?'<div><span>Unallocated in pool</span><b class="num">'+rm(b.idle)+'</b></div>':'')+'</div>'+
+      '<p class="hint" style="margin:0">Pull the principal back from companies (undeployed money only). Prefilled largest-available first.</p><div class="form-grid">'+
+      S.companies.map(c=>field('rp_'+c.id,esc(c.name)+' · avail '+shortN(b.avail(c.id)),inp('rp_'+c.id,pre[c.id]||'','number','min="0"'))).join('')+'</div>'+
+      '<div class="prev" id="rp_sum"></div>',
+    x=>{const b2=balances();let tot=Math.max(0,b2.idle);
+      for(const c of S.companies){const a=num(x['rp_'+c.id]);if(a<0)return 'Amounts can’t be negative.';if(a>b2.avail(c.id)+0.004)return c.name+' has only '+rm(b2.avail(c.id))+' undeployed.';tot+=a}
+      if(tot<f.principal-0.5)return 'Short '+rm(r2(f.principal-tot))+'. Recall more, or roll over instead.';
+      if(tot>f.principal+0.5)return 'That’s '+rm(r2(tot-f.principal))+' more than the principal.';
+      S.companies.forEach(c=>{const a=num(x['rp_'+c.id]);if(a>0)L(AS_OF,'recall','co:'+c.id,'pool',a,f.id,'Recall for principal repayment')});
+      L(AS_OF,'investor_principal_repaid','pool','inv:'+f.investorId,f.principal,f.id,'Principal repaid at maturity');f.status='repaid';f.repaidOn=AS_OF;toast('Principal '+rm(f.principal)+' repaid to '+invName(f.investorId))},'Mark principal repaid',
+    fm=>{const t=sum(S.companies,c=>num(fm['rp_'+c.id].value))+Math.max(0,balances().idle),diff=r2(f.principal-t);
+      document.getElementById('rp_sum').innerHTML='<div><span>Total recalled</span><b class="num">'+rm(r2(t))+'</b></div><div><span>'+(diff>0.5?'Short':'Remaining')+'</span><b class="num" style="color:'+(diff>0.5?'var(--bad)':'inherit')+'">'+rm(Math.max(0,diff))+'</b></div>'})},
+  tab:(d,el,e)=>{ui.tab[d.cu]=d.k;ui.ocr=null;if(d.nav){return}render()},
+  acctAll:d=>{document.querySelectorAll('details.acct').forEach(el=>{el.open=d.open==='1';ui.aOpen[el.dataset.cu]=el.open})},
+  repayCase:d=>{const k=S.cases.find(x=>x.id===d.k),i=caseInfo(k),def=i.overdue>0?i.overdue:(i.next?owe(i.next):0);
+    openModal('Repayment · '+k.ref,'<div class="form-grid">'+field('rp_amt','Amount received (RM)',inp('rp_amt',def,'number','min="0" step="0.01"'))+field('rp_date','Date received',inp('rp_date',AS_OF,'date'))+
+      field('rp_ref','Reference (cheque / transfer no.)',inp('rp_ref','','text','placeholder="e.g. CHQ 004600"'))+field('rp_m','Method','<select class="in" id="rp_m" name="rp_m">'+['Bank transfer','DuitNow','Cheque','Cash'].map(x=>opt(x,x)).join('')+'</select>')+'</div><div class="prev" id="rp_prev"></div>',
+      x=>{const a=r2(num(x.rp_amt));if(a<=0)return 'Enter the amount received.';const ref=x.rp_ref.trim();
+        if(ref&&S.payments.some(p=>p.ref.toUpperCase().replace(/\s+/g,' ')===ref.toUpperCase().replace(/\s+/g,' ')))return 'Reference '+ref+' was already posted — possible duplicate slip.';
+        const res=applyPayment(k,a,x.rp_date||AS_OF,ref||('MANUAL '+(x.rp_date||AS_OF)),x.rp_m);
+        toast('Posted '+rm(a)+' to '+k.ref+(res.touched.length?' #'+res.touched.join(', #'):'')+(res.excess>0?' · '+rm(res.excess)+' excess held as credit':''))},'Post repayment',
+      fm=>{let rem=num(fm.rp_amt.value);const lines=[];
+        for(const r of k.rows){if(rem<=0.004)break;const o=owe(r);if(o<=0.004)continue;const t=Math.min(rem,o);lines.push('#'+r.n+' · '+fds(r.due)+' · '+(t<o-0.004?'part '+fmt(t)+' of '+fmt(o):fmt(t)));rem=r2(rem-t)}
+        document.getElementById('rp_prev').innerHTML='<div><span>Applies to</span><b style="text-align:right">'+(lines.join('<br>')||'—')+'</b></div>'+(rem>0.004?'<div><span>Excess (held as credit)</span><b class="num">'+rm(rem)+'</b></div>':'')+'<div><span>Split</span><span>Profit first, then principal</span></div>'})},
+  cbMonth:d=>{const cos=scopeCos(d.scope,'capboost');openView('CapBoost · '+ymLabel(d.ym)+' · '+esc(d.scope==='all'?'All companies':cos[0].name),cbMonthHTML(d.ym,d.scope))},
+  fMonth:d=>{const cos=scopeCos(d.scope,'factoring');openView('Capbridge-i · '+ymLabel(d.ym)+' · '+esc(d.scope==='all'?'All companies':cos[0].name),fMonthHTML(d.ym,d.scope))},
+  cbList:d=>{const cos=scopeCos(d.scope,'capboost'),t=d.scope==='all'?'All companies':cos[0].name;openView((d.kind==='od'?'Overdue CapBoost cases':'All CapBoost cases issued')+' · '+esc(t),cbListHTML(d.kind,d.scope))},
+  settleCase:d=>{const k=S.cases.find(x=>x.id===d.k),c0=settleCalc(k,AS_OF);
+    const line=(id,label,val,hint)=>'<div class="sline"><label for="'+id+'"><span>'+label+'</span>'+(hint?'<span class="small">'+hint+'</span>':'')+'</label><input class="in" style="text-align:right" type="number" step="0.01" min="0" id="'+id+'" name="'+id+'" value="'+val+'"></div>';
+    openModal('Early settlement · '+k.ref,'<div class="form-grid">'+field('st_date','Settlement date',inp('st_date',AS_OF,'date'))+field('st_ref','Reference (cheque / transfer no.)',inp('st_ref',''))+'</div>'+
+      '<div class="prev" style="gap:2px">'+line('st_p','Outstanding principal',c0.pOut,'<span id="st_p_h">Outstanding RM '+fmt(c0.pOut)+'</span>')+
+      line('st_m','Profit for this month','',k.rate+'% × RM '+fmt(k.amount)+' · <span id="st_m_h"></span>')+
+      line('st_o','Overdue profit, past months',c0.overdueF,'Unpaid profit on earlier instalments')+
+      '<datalist id="st_presets"><option value="Late payment charge (ta’widh)"><option value="Legal / stamping fee"><option value="Rebate (ibra’)"><option value="Discount"><option value="Admin fee"></datalist>'+
+      '<div id="st_items" style="display:grid;gap:6px;margin-top:6px"></div>'+
+      '<div><button type="button" class="btn sm" data-act="stAddItem">+ Add item</button></div>'+
+      '<div id="st_tot" style="display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px;margin-top:6px"></div></div>'+
+      '<p class="hint" style="margin:0">Pre-filled: outstanding principal + this month’s profit at the case rate + overdue profit. Change any amount, or add charges / deductions. Profit not collected is waived.</p>',
+      (x,fm)=>{const date=x.st_date||AS_OF,ref=x.st_ref.trim()||('SETTLE '+k.ref),c=settleCalc(k,date);
+        if(x.st_ref.trim()&&S.payments.some(p=>p.ref.toUpperCase()===ref.toUpperCase()))return 'Reference '+ref+' was already posted — possible duplicate slip.';
+        const pr=num(x.st_p);if(pr>c.pOut+0.004)return 'Principal can’t be more than the outstanding RM '+fmt(c.pOut)+'. Add the extra as an item.';
+        const items=stItems(fm);if(items.some(i=>i.amt>0&&!i.label))return 'Give each added item a name.';
+        const plus=r2(sum(items.filter(i=>i.sign>0),i=>i.amt)),minus=r2(sum(items.filter(i=>i.sign<0),i=>i.amt)),profit=r2(num(x.st_m)+num(x.st_o));
+        if(minus>profit+plus+0.004)return 'Deductions are more than the profit and charges. Lower the principal instead.';
+        const r=applySettlement(k,date,ref,{principal:pr,profit,deduct:Math.min(minus,profit),charges:r2(plus-Math.max(0,minus-profit)),items});
+        toast(k.ref+' settled · '+rm(r.total)+' received'+(r.writeoff>0?' · '+rm(r.writeoff)+' written off':'')+' · '+rm(r.waived)+' profit waived')},'Confirm settlement',
+      (fm,e)=>{const t=e&&e.target,date=fm.st_date.value||AS_OF,c=settleCalc(k,date);
+        if(!e||t.id==='st_date'){fm.st_p.value=c.pOut;fm.st_m.value=c.monthF;fm.st_o.value=c.overdueF;
+          document.getElementById('st_p_h').textContent='Outstanding RM '+fmt(c.pOut);
+          document.getElementById('st_m_h').textContent=ymLabel(c.ym)+(c.cur&&c.monthF===0?' · already paid':'')}
+        const items=stItems(fm),plus=r2(sum(items.filter(i=>i.sign>0),i=>i.amt)),minus=r2(sum(items.filter(i=>i.sign<0),i=>i.amt));
+        const pr=num(fm.st_p.value),tot=r2(pr+num(fm.st_m.value)+num(fm.st_o.value)+plus-minus),wo=r2(c.pOut-pr);
+        document.getElementById('st_tot').innerHTML=(plus?'<div style="display:flex;justify-content:space-between"><span>Added items</span><b class="num">+'+rm(plus)+'</b></div>':'')+
+          (minus?'<div style="display:flex;justify-content:space-between"><span>Deducted items</span><b class="num">−'+rm(minus)+'</b></div>':'')+
+          '<div style="display:flex;justify-content:space-between;align-items:baseline"><b>Settlement amount</b><b class="num" style="font-size:17px">'+rm(tot)+'</b></div>'+
+          (wo>0.004?'<div style="display:flex;justify-content:space-between;color:var(--bad)"><span>Principal written off</span><b class="num">'+rm(wo)+'</b></div>':wo<-0.004?'<div style="color:var(--bad)">Principal is more than outstanding — add the extra as an item.</div>':'')})},
+  stAddItem:()=>{const box=document.getElementById('st_items'),n=box.children.length?1+Math.max(...[...box.children].map(x=>+x.dataset.n)):0;
+    box.insertAdjacentHTML('beforeend','<div class="stitem" data-n="'+n+'">'+
+      '<input class="in" list="st_presets" id="it_l_'+n+'" name="it_l_'+n+'" placeholder="Item, e.g. Rebate (ibra’)" aria-label="Item name">'+
+      '<select class="in" id="it_s_'+n+'" name="it_s_'+n+'" aria-label="Add or deduct"><option value="1">+ Add</option><option value="-1">− Deduct</option></select>'+
+      '<input class="in" style="text-align:right" type="number" min="0" step="0.01" id="it_a_'+n+'" name="it_a_'+n+'" placeholder="0.00" aria-label="Item amount">'+
+      '<button type="button" class="btn sm" data-act="stDelItem" data-n="'+n+'" aria-label="Remove item">×</button></div>');
+    document.getElementById('it_l_'+n).focus()},
+  stDelItem:d=>{const el=document.querySelector('#st_items > [data-n="'+d.n+'"]');if(el)el.remove();MODAL.onInput(document.getElementById('mf'))},
+  editRow:d=>{const k=S.cases.find(x=>x.id===d.k),r=k.rows.find(x=>x.n==d.n);openModal(k.ref+' · Instalment #'+r.n,'<div class="prev"><div><span>Due '+fd(r.due)+'</span><b class="num">'+rm(inst(r))+'</b></div><div><span>Principal / profit</span><b class="num">'+fmt(r.principal)+' / '+fmt(r.profit)+'</b></div></div><div class="form-grid">'+
+    field('m_a','Amount received (RM)',inp('m_a',recd(r)||'','number','min="0" step="0.01"'))+field('m_d','Date received',inp('m_d',r.date||AS_OF,'date'))+'</div><p class="hint" style="margin:0">Applied profit first, then principal. Changes post adjustment rows to the ledger.</p>',
+    x=>{const a=num(x.m_a);if(a<0)return 'Amount can’t be negative.';if(a>inst(r)+0.004)return 'More than this instalment ('+rm(inst(r))+'). Use Record payment to spread an over payment.';setRow(k,r,r2(a),x.m_d);toast('Instalment #'+r.n+' updated')},'Save')},
+  ocrSample:d=>{const k=S.cases.find(x=>x.id===d.k),cu=custById(d.cu),i=caseInfo(k),r=i.unpaid[0];
+    ui.ocr={cust:cu.id,caseId:k.id,file:'slip_'+AS_OF.slice(8)+MON[D(AS_OF).m-1].toLowerCase()+'.jpg',img:null,payer:cu.name.toUpperCase(),amount:r?String(owe(r)):'0',date:AS_OF,ref:'CHQ 004512',conf:{payer:98,amount:99,date:95,ref:71}};render()},
+  ocrClear:()=>{ui.ocr=null;render()},
+  ocrPost:()=>{const o=ui.ocr,m=ocrMatch(o);if(!m.k||m.dup)return;const amt=r2(num(o.amount));
+    const res=applyPayment(m.k,amt,o.date||AS_OF,String(o.ref).trim(),'OCR · '+o.file);ui.tab[m.cu.id]=m.k.id;ui.ocr=null;save();
+    if(route()!=='customer-'+m.cu.id)location.hash='customer-'+m.cu.id;else render();
+    toast('Posted '+rm(amt)+' to '+m.k.ref+' #'+res.touched.join(', #')+(res.excess>0?' · '+rm(res.excess)+' excess held as credit':''))},
+  detect:()=>{const t=document.getElementById('paste').value;const{F,C}=parsePaste(t);ui.nc={...ui.nc,text:t,F:{...F,product:F.product||ui.nc.F.product||'',company:F.company||ui.nc.F.company||'',owner:ui.nc.F.owner||'Chloe'},C,detected:true,form:null};render()},
+  appSample:()=>readForm(),
+  appClear:()=>{ui.nc=null;render()},
+  pasteSample:()=>{const c=S.customers[0];ui.nc={text:'Fwd from WhatsApp\nCompany: '+c.name+'\nSSM: '+c.ssm+'\nDirector: '+c.director+'\nHP: '+c.phone+'\nNeed RM150,000 for 6 months',F:{},C:{},detected:false,file:''};render()},
+  saveCust:d=>{const n=ui.nc,F=n.F,err=document.getElementById('ncerr');
+    if(!F.name||!(F.ssm||F.ic)){err.textContent='Company name and SSM or IC are required.';return}
+    const dup=findDup(F);if(dup){err.innerHTML='A customer with this SSM / IC already exists: <a href="#customer-'+dup.id+'">'+esc(dup.name)+'</a>. Open it instead of creating a duplicate.';return}
+    const addr=F.address||'',parts=addr.split(',').map(s=>s.trim()).filter(Boolean);
+    const cu={id:'c'+S.seq++,name:F.name,ssm:F.ssm||'',industry:F.industry||'',address:addr,location:parts.length>1?parts[parts.length-2]:(parts[0]||''),director:F.director||'',ic:F.ic||'',phone:F.phone||'',email:F.email||'',docs:n.form?[n.form.file]:[]};
+    S.customers.push(cu);save();ui.nc=null;toast(cu.name+' saved');
+    if(d.case){location.hash='customer-'+cu.id;setTimeout(()=>{if(F.product==='factoring')newInvModal(false,{co:F.company,cl:cu.id});else newCaseModal({cu:cu.id,co:F.company,amount:num(F.amount)||100000,tenure:num(F.tenure)||12,purpose:F.purpose||''})},200)}
+    else location.hash='customer-'+cu.id},
+  editCust:d=>{const c=custById(d.id);const k=['name','ssm','industry','location','address','director','ic','phone','email'],lb={name:'Company name',ssm:'SSM no.',industry:'Industry',location:'Location',address:'Address',director:'Director',ic:'IC no.',phone:'Phone',email:'Email'};
+    openModal('Edit customer','<div class="form-grid">'+k.map(x=>field('e_'+x,lb[x],inp('e_'+x,c[x]))).join('')+'</div>',x=>{if(!x.e_name.trim())return 'Company name is required.';k.forEach(y=>c[y]=x['e_'+y].trim());toast('Customer updated')},'Save')},
+  newCase:d=>newCaseModal({cu:d.cu||S.customers[0].id,co:d.co}),
+  newInv:d=>newInvModal(!!d.ocr,{co:d.co,cl:d.cl}),
+  addCo:()=>openModal('Add company','<div class="form-grid">'+field('a_name','Company name',inp('a_name',''))+field('a_short','Short code (2–3 letters)',inp('a_short',''))+'</div>'+
+    '<div class="f"><span class="small">Products offered</span><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="a_cb" id="a_cb"> CapBoost</label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="a_fa" id="a_fa"> Capbridge-i</label></div>'+
+    '<div class="form-grid">'+field('a_pu','Purpose (if no products)',inp('a_pu','Expenses / parking only'))+field('a_cof','COF % p.a.',inp('a_cof',11.5,'number','step="0.01"'))+'</div>',
+    x=>{const nm=x.a_name.trim();if(!nm)return 'Enter the company name.';if(S.companies.some(c=>c.name.toLowerCase()===nm.toLowerCase()))return nm+' already exists.';
+      const sc=(x.a_short.trim()||nm.split(/\s+/).map(w=>w[0]).join('').slice(0,3)).toUpperCase();
+      const products=[x.a_cb?'capboost':null,x.a_fa?'factoring':null].filter(Boolean);
+      S.companies.push({id:'co'+S.seq++,name:nm,short:sc,products,purpose:products.length?'':x.a_pu.trim(),cofRate:num(x.a_cof),threshold:80,prefix:sc});toast(nm+' added')},'Add company'),
+  invVerify:d=>{const i=S.invoices.find(x=>x.id===d.i);i.status='verified';save();render();toast(i.no+' · debtor verified')},
+  invFund:d=>{const i=S.invoices.find(x=>x.id===d.i),b=balances();if(i.advanced>b.avail(i.companyId)){toast(coById(i.companyId).name+' has only '+rm(b.avail(i.companyId))+' available — allocate more first');return}
+    if(debtorConc().some(x=>x.debtor===i.debtor&&x.over))toast('Note: '+i.debtor+' is already over the debtor limit');
+    i.status='funded';i.fundedOn=AS_OF;L(AS_OF,'disbursement','co:'+i.companyId,'inv:'+i.no,i.advanced,i.no,'Advance to client');save();render();toast(i.no+' funded · '+rm(i.advanced)+' advanced')},
+  invCollect:d=>{const i=S.invoices.find(x=>x.id===d.i),mths=Math.max(1,Math.ceil(days(i.fundedOn,AS_OF)/30));
+    i.fee=r2(i.advanced*S.settings.factorFee/100*mths);i.rebate=r2(i.amount-i.advanced-i.fee);i.status='collected';i.collectedOn=AS_OF;
+    L(AS_OF,'repayment_principal','inv:'+i.no,'co:'+i.companyId,i.advanced,i.no,'Debtor paid · advance back');L(AS_OF,'repayment_profit','inv:'+i.no,'co:'+i.companyId,i.fee,i.no,'Fee (ujrah) '+mths+' mth');
+    L(AS_OF,'rebate_to_client','co:'+i.companyId,'cust:'+i.clientId,i.rebate,i.no,'Balance / rebate to client');save();render();toast(i.no+' collected · fee '+rm(i.fee)+' · rebate '+rm(i.rebate))}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=ACT[el.dataset.act];if(!a)return;
+  if(el.tagName==='BUTTON'&&el.type!=='submit')e.preventDefault();a(el.dataset,el,e)});
+document.addEventListener('toggle',e=>{const el=e.target;if(el.classList&&el.classList.contains('acct'))ui.aOpen[el.dataset.cu]=el.open},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&MODAL)closeModal();
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('[role=button][data-act]')){e.preventDefault();e.target.click()}});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.ui==='aq'){ui.aq=t.value;const l=document.getElementById('acct_list');if(l)l.innerHTML=acctListHTML()}
+  if(t.dataset.ui==='q'){ui.q=t.value;const tb=document.getElementById('ctb');if(tb)tb.innerHTML=custRowsHTML(ui.co)}
+  if(t.dataset.nc&&ui.nc&&t.dataset.nc!=='file'){if(t.dataset.nc==='text')ui.nc.text=t.value;else ui.nc.F[t.dataset.nc]=t.value}
+  if(t.dataset.ocr&&t.dataset.ocr!=='file'&&ui.ocr){ui.ocr[t.dataset.ocr]=t.value}});
+document.addEventListener('change',e=>{const t=e.target,u=t.dataset.ui;
+  if(u==='st'||u==='sort'||u==='lt'||u==='cbYear'||u==='fYear'||u==='aShow'||u==='aSort'){ui[u]=t.value;render()}
+  else if(u==='month'){ui.month=t.value;render()}
+  else if(u==='cosw'){location.hash='customers-'+t.value}
+  else if(u==='psw'){location.hash=t.dataset.p+'-'+t.value}
+  else if(t.dataset.nc==='product'&&ui.nc){ui.nc.F.product=t.value;if(ui.nc.F.company&&!offers(coById(ui.nc.F.company),t.value))ui.nc.F.company='';render()}
+  else if(t.dataset.nc==='file'&&t.files[0]){ui.nc.file=t.files[0].name;render()}
+  else if(t.dataset.nc==='appform'&&t.files[0]){readForm(t.files[0].name)}
+  else if(t.dataset.ocr==='file'&&t.files[0]){const fl=t.files[0],r=location.hash.slice(10),cu=custById(route().slice(9));if(!cu)return;
+    const tab=ui.tab[cu.id]||(S.cases.find(k=>k.customerId===cu.id&&caseInfo(k).unpaid.length)||{}).id;const k=S.cases.find(x=>x.id===tab);if(!k)return;
+    ACT.ocrSample({cu:cu.id,k:k.id});ui.ocr.file=fl.name;
+    if(fl.type.startsWith('image/')){const rd=new FileReader();rd.onload=()=>{if(ui.ocr){ui.ocr.img=rd.result;render()}};rd.readAsDataURL(fl)}else render()}
+  else if(t.dataset.ocr&&ui.ocr){ui.ocr[t.dataset.ocr]=t.value;render()}});
+
+render();
+</script>
+
+</body></html>
